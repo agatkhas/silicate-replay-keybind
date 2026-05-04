@@ -2,7 +2,6 @@
 #include <Geode/binding/GJBaseGameLayer.hpp>
 #include <deque>
 
-#include "module/module.hpp"
 #include "settings/settings.hpp"
 #include "shared/value/value.hpp"
 
@@ -19,9 +18,7 @@ struct HitboxTrailUnit {
     void drawCircle(cocos2d::CCDrawNode* node, float width, float* colors, float fillOpacity);
 };
 
-class Hitboxes : mod::Module {
-    INIT_MODULE(Hitboxes)
-
+class Hitboxes {
     class HitboxesDrawNode : public cocos2d::CCDrawNode {
        public:
         static HitboxesDrawNode* create() {
