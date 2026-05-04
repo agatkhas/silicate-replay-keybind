@@ -18,7 +18,6 @@ add_library(${PROJECT_NAME} SHARED
     src/bot/bot.cpp
     src/bot/updater.cpp
     src/bot/scheduler.cpp
-    src/bot/tick.cpp
 
     src/assist/autoclicker.cpp
     src/assist/hitboxes.cpp
