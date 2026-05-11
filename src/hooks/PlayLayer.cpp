@@ -579,13 +579,30 @@ struct SLPlayLayer : Modify<SLPlayLayer, PlayLayer> {
         return true;
     }
 
+    void conditionalDestroyPlayer(PlayerObject* player, GameObject* gameObject) {
+        if (gameObject == m_anticheatSpike) {
+            return PlayLayer::destroyPlayer(player, gameObject);
+        }
+
+        auto bot = Bot::get();
+
+        using N = BotUpdater::NoclipType;
+        bool shouldDie = bot->updater().m_noclipType == N::Player1 && (player == m_player2) ||
+            bot->updater().m_noclipType == N::Player2 && (player == m_player1);
+
+        if (!bot->updater().m_noclip->inner() || shouldDie) {
+            return PlayLayer::destroyPlayer(player, gameObject);
+        }
+    }
+
     void destroyPlayer(PlayerObject* player, GameObject* gameObject) {
         auto bot = Bot::get();
 
         if (!bot->trajectory().hasDied(player)) {
-            PlayLayer::destroyPlayer(player, gameObject);
+            this->conditionalDestroyPlayer(player, gameObject);
 
             if (bot->updater().m_preventDeath->inner() &&
+                !bot->updater().m_noclip->inner() &&
                 gameObject != m_anticheatSpike) {
                 bot->updater().backwardsStep();
                 this->processQueuedButtons(0.0, true);

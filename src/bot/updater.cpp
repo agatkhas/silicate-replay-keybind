@@ -17,7 +17,6 @@
 #include "render/renderer.hpp"
 #include "replay/system.hpp"
 #include "scheduler.hpp"
-#include "speedhack.hpp"
 #include "trajectory/trajectory.hpp"
 #include "util/midhook.hpp"
 #include "util/profile.hpp"
@@ -202,8 +201,6 @@ static void runSlowLockDeltaUpdates(float realDt,
 
 void BotUpdater::runUpdates(std::function<void(float)> update, float realDt,
                             bool frozen) {
-    performAntiDebugChecks();
-
     auto bot = Bot::get();
     m_allowedToProcessActions = true;
 
@@ -361,7 +358,7 @@ uint32_t BotUpdater::getFrame() {
 
     // No intentional death in editor, use built in frame counter
     if (auto lel = LevelEditorLayer::get(); lel) {
-        return static_cast<uint32_t>(std::max(0, static_cast<int>(lel->m_gameState.m_currentProgress) - 1));
+        return static_cast<uint32_t>(std::max(0, static_cast<int>(lel->m_gameState.m_currentProgress / 2) - 1));
     }
 
     return 0;
@@ -382,95 +379,22 @@ void BotUpdater::backwardsStep(int n) {
     }
 
     if (m_backwardsStepping->inner()) {
-        // this->scheduleFrozenFunction([](float) {
-        auto pl = PlayLayer::get();
-        auto bot = Bot::get();
+        this->scheduleFrozenFunction([](float) {
+          auto pl = PlayLayer::get();
+          auto bot = Bot::get();
 
-        for (int i = 0; i < n - 1; i++) {
-            bot->practiceFix().dropLastStoredFrame();
-        }
+          for (int i = 0; i < n - 1; i++) {
+              bot->practiceFix().dropLastStoredFrame();
+          }
 
-        if (bot->practiceFix().m_storedFrames.size() <= 1) {
-            return;
-        }
-
-        // bot->replaySystem().m_forceNextInput = true;
-        // pl->processQueuedButtons();
-        // bot->replaySystem().m_forceNextInput = false;
-        //
-        bot->practiceFix().m_loadCheckpoint = true;
-        bot->practiceFix().m_isBackstep = true;
-        pl->resetLevel();
-        bot->practiceFix().m_loadCheckpoint = false;
-
-        // for (int i = 0; i < pl->m_objects->count(); i++) {
-        //     GameObject* object =
-        //         (GameObject*)pl->m_objects->objectAtIndex(i);
-
-        //     CCPoint pos = object->getRealPosition();
-
-        //     object->resetObject();
-        //     // if (object->m_outerSectionIndex >= 0) {
-        //     //     if (object->m_positionX > 0.0) {
-
-        //     //     }
-        //     // }
-
-        //     object->m_isDirty = true;
-        //     object->setObjectRectDirty(true);
-        //     object->setOrientedRectDirty(true);
-        // }
-
-        // bot->practiceFix().restorePreviousFrame();
-
-        // pl->updateCamera(0.0);
-        // pl->updateVisibility(0.0);
-        // pl->updateGradientLayers();
-        // pl->updateShaderLayer(0.0);
-
-        // pl->stopActionByTag(0x10);
-
-        // bot->replaySystem().onReset(bot->updater().getFrame());
-
-        // bot->labels().update(false);
-
-        // if (bot->isRecording()) {
-        //     auto& rs = bot->replaySystem();
-
-        //     for (auto& [b, lastInput] : rs.m_lastInputs) {
-        //         if (lastInput.m_frame >= bot->updater().getFrame()) {
-        //             bool queue = true;
-
-        //             if (lastInput.m_button ==
-        //             sv2::Input::InputType::Jump
-        //             &&
-        //                 pl->m_player1->m_jumpBuffered &&
-        //                 lastInput.m_holding && !lastInput.m_player2)
-        //                 { queue = false;
-        //             }
-
-        //             if (lastInput.m_button ==
-        //             sv2::Input::InputType::Jump
-        //             &&
-        //                 pl->m_player2->m_jumpBuffered &&
-        //                 lastInput.m_holding && lastInput.m_player2) {
-        //                 queue = false;
-        //             }
-
-        //             // queue that shit
-        //             if (queue)
-        //                 pl->queueButton(
-        //                     static_cast<int>(lastInput.m_button),
-        //                     lastInput.m_holding,
-        //                     lastInput.m_player2);
-        //         }
-        //     }
-
-        //     rs.m_lastInputs.clear();
-        // }
-
-        // bot->updater().m_tpsOverflow = 0.0;
-        // });
+          if (bot->practiceFix().m_storedFrames.size() <= 1) {
+              return;
+          }
+          bot->practiceFix().m_loadCheckpoint = true;
+          bot->practiceFix().m_isBackstep = true;
+          pl->resetLevel();
+          bot->practiceFix().m_loadCheckpoint = false;
+        });
     }
 }
 
@@ -569,6 +493,7 @@ static void frameUpdateMidhook(SafetyHookContext& ctx) {
     SCOPED_TIMER("frameUpdate")
 
     auto bot = Bot::get();
+    if (!bot->isEnabled()) return;
 
     auto pl = GJBaseGameLayer::get();
     if (!pl) return;
@@ -642,6 +567,7 @@ static void physDtMidhook(SafetyHookContext& ctx) {
     if (!pl) return;
 
     auto bot = Bot::get();
+    if (!bot->isEnabled()) return;
     if (bot->updater().m_onlyRefresh) return;
 
     ctx.xmm1.f64[0] *= bot->updater().m_tps->inner() / 60.0;
@@ -676,6 +602,7 @@ static void physDtMidhook(SafetyHookContext& ctx) {
 
 static void physStepCountMidhook(SafetyHookContext& ctx) {
     auto bot = Bot::get();
+    if (!bot->isEnabled()) return;
     bool fastBypass = bot->updater().useFastLockDelta() ||
                       !bot->updater().m_lockDelta->inner();
     if (!fastBypass && PlayLayer::get()) return;
@@ -697,6 +624,7 @@ static void restorePhysDtHook(SafetyHookContext& ctx) {
     if (!pl) return;
 
     auto bot = Bot::get();
+    if (!bot->isEnabled()) return;
     bool fastBypass = bot->updater().useFastLockDelta() ||
                       !bot->updater().m_lockDelta->inner();
     if (!fastBypass && PlayLayer::get()) return;

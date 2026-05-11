@@ -270,6 +270,18 @@ static std::vector<Theme> s_themes = {
     ),
 };
 
+ 
+static uint64_t fnv1aHash(const std::vector<uint8_t>& data) {
+    uint64_t hash = 14695981039346656037ull;
+
+    for (const uint8_t byte : data) {
+        hash ^= byte;
+        hash *= 1099511628211;
+    }
+
+    return hash;
+}
+
 using DpiGetterType = decltype(GetDpiForWindow)*;
 static DpiGetterType g_dpiGetter = nullptr;
 
@@ -856,6 +868,18 @@ void UIManager::draw() {
 
                 tabby::divider();
 
+                tabby::text("Noclip", m_medium);
+
+                // god i hate working on this. Rust release me
+                tabby::checkbox("Enabled##Noclip", Bot::get()->updater().m_noclip->inner());
+
+                tabby::dropdown(
+                    "Player##Noclip", m_state.m_noclipState,
+                    *reinterpret_cast<int*>(
+                        &Bot::get()->updater().m_noclipType), popupShaderFn);
+
+                tabby::divider();
+
                 tabby::text("Trajectory", m_medium);
 
                 tabby::checkbox(
@@ -1123,7 +1147,17 @@ void UIManager::draw() {
                             req.get(ffmpegUrl),
                             [&](web::WebResponse resp) {
                                 const auto data = resp.data();
-                                geode::log::info("Got FFmpeg. Unzipping...");
+
+                                geode::log::info("Verifying checksum...");
+                                uint64_t hash = fnv1aHash(data);
+                                constexpr uint64_t EXPECTED = 0x44618c661fa11607ull;
+                                if (hash != EXPECTED) {
+                                    geode::log::error("Invalid checksum! Aborting FFmpeg loader");
+                                    m_ffmpegDownloadProgress = -1.0;
+                                    return;
+                                }
+
+                                geode::log::info("Checksum valid! Unzipping...");
                                 auto unzipResult = geode::utils::file::Unzip::create(data);
                                 if (unzipResult.isErr()) {
                                     return;

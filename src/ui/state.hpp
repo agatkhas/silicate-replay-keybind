@@ -147,6 +147,16 @@ struct UIState {
 
     tabby::DropdownState m_themeState;
 
+    tabby::DropdownState m_noclipState = {
+        .options =
+            {
+                "Player 1",
+                "Player 2",
+                "Both",
+            },
+    };
+
+
     using HitboxType = SLSettings::HitboxSettings::Type;
     tabby::DropdownState m_hitboxState = {
         .options =

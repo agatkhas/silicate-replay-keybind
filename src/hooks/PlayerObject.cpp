@@ -114,6 +114,19 @@ struct SLPlayerObject : Modify<SLPlayerObject, PlayerObject> {
         return; // don't, we don't use pending checkpoints anywhere
     }
 
+    void tryPlaceCheckpoint() {
+        if (!GameManager::get()->getGameVariable("0027")) {
+            return;
+        }
+
+        const double checkpointTimeout = this->m_quickCheckpointMode ? 0.2 : 1;
+        if ((this->m_gameLayer->m_gameState.m_totalTime - this->m_lastCheckpointTime) > checkpointTimeout) {
+            this->m_gameLayer->m_uiLayer->onCheck(nullptr);
+            this->m_shouldTryPlacingCheckpoint = false;
+            this->m_lastCheckpointTime = this->m_totalTime;
+        }
+    }
+
     void releaseAllButtons() {
         if (!Bot::get()->isEnabled()) {
             return PlayerObject::releaseAllButtons();

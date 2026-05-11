@@ -27,6 +27,7 @@ class BotUpdater {
     bool _predictBestPath = false;
     bool _extrapolation = false;
     bool _layoutMode = false;
+    bool _noclip = false;
 
     std::forward_list<std::function<void(float)>> m_frozenScheduledFunctions;
 
@@ -121,6 +122,17 @@ class BotUpdater {
         SLValue<bool>::create("updater.full_game_prediction", &SLSettings::get()->fullGamePrediction);
     SLValuePtr<float> m_acceptablePrediction =
         SLValue<float>::create("updater.acceptable_prediction", &SLSettings::get()->acceptablePrediction);
+
+    enum class NoclipType {
+        Player1,
+        Player2,
+        Both
+    };
+
+    SLValuePtr<bool> m_noclip =
+        SLValue<bool>::create("updater.noclip", &_noclip);
+    NoclipType m_noclipType = NoclipType::Player1;
+
     bool m_isAutoFlipped = false;
     bool m_predicting = false;
 
