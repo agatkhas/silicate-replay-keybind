@@ -68,6 +68,18 @@ void ReplaySystem::save(std::filesystem::path path, bool noOverwrite) {
     }
 
     Replay replay;
+    std::stable_sort(m_actionAtom.m_actions.begin(), m_actionAtom.m_actions.end(),
+                      [](const auto& a, const auto& b) {
+                          return a.m_frame < b.m_frame;
+                      });
+
+    uint64_t previousFrame = 0;
+    for (auto& action : m_actionAtom.m_actions) {
+      // recalculate delta for all actions
+      action.recalculateDelta(previousFrame);
+      previousFrame = action.m_frame;
+    }
+
     replay.m_atoms.add(m_actionAtom);
 
     replay.m_meta.m_build = 81;
