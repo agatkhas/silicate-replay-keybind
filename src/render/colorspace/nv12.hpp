@@ -6,7 +6,6 @@ class NV12Colorspace : public Colorspace {
    public:
     const std::vector<RenderPass> getPasses() override {
         const uintptr_t yPlaneSize = m_alignedWidth * m_alignedHeight;
-        const uintptr_t uvPlaneSize = yPlaneSize / 4;  // YUV 4:2:0
 
         const char* vertexShader = R"(#version 130
         in vec4 a_position;

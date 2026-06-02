@@ -177,7 +177,7 @@ struct SLGJBaseGameLayer : Modify<SLGJBaseGameLayer, GJBaseGameLayer> {
         m_fields->m_lastGround2.loadIntoGround(m_groundLayer2);
     }
 
-    void update(float dt) {
+    void update(float dt) override {
         auto& updater = Bot::get()->updater();
         if (updater.m_onlyRefresh || !Bot::get()->isEnabled()) {
             GJBaseGameLayer::update(dt);
@@ -309,7 +309,8 @@ struct SLGJBaseGameLayer : Modify<SLGJBaseGameLayer, GJBaseGameLayer> {
                 .m_button = static_cast<PlayerButton>(1),
                 .m_isPush = (bool)(p1Jumping ^ p1->m_isUpsideDown),
                 .m_isPlayer2 = bot->replaySystem().playerFlipped(false),
-                .m_step = 0});
+                .m_step = 0,
+                .m_timestamp = 0.0});
 
             this->handleButton(p1Jumping ^ p1->m_isUpsideDown, 1,
                                bot->replaySystem().playerFlipped(true));
@@ -323,7 +324,8 @@ struct SLGJBaseGameLayer : Modify<SLGJBaseGameLayer, GJBaseGameLayer> {
                 .m_button = static_cast<PlayerButton>(1),
                 .m_isPush = (bool)(p2Jumping ^ p2->m_isUpsideDown),
                 .m_isPlayer2 = bot->replaySystem().playerFlipped(true),
-                .m_step = 0});
+                .m_step = 0,
+                .m_timestamp = 0.0});
 
             this->handleButton(p2Jumping ^ p2->m_isUpsideDown, 1,
                                bot->replaySystem().playerFlipped(false));
@@ -371,6 +373,7 @@ struct SLGJBaseGameLayer : Modify<SLGJBaseGameLayer, GJBaseGameLayer> {
             .m_isPush = pressed,
             .m_isPlayer2 = !player1,
             .m_step = 0,
+            .m_timestamp = 0.0,
         });
         return GJBaseGameLayer::handleButton(pressed, button, player1);
     }
@@ -446,7 +449,8 @@ struct SLGJBaseGameLayer : Modify<SLGJBaseGameLayer, GJBaseGameLayer> {
                 .m_button = (PlayerButton)1,
                 .m_isPush = bot->updater().m_isAutoFlipped,
                 .m_isPlayer2 = false,
-                .m_step = 0
+                .m_step = 0,
+                .m_timestamp = 0.0
             });
         }
     }
@@ -571,7 +575,7 @@ struct SLGJBaseGameLayer : Modify<SLGJBaseGameLayer, GJBaseGameLayer> {
 
         const auto& updateAllObjectsForGroup = [&, this](int group) {
             cocos2d::CCArray* objects = this->getGroup(group);
-            for (int i = 0; i < objects->count(); i++) {
+            for (int i = 0; i < (int)objects->count(); i++) {
                 GameObject* object = (GameObject*)objects->objectAtIndex(i);
                 object->m_varianceIndex = randomHashObject(object, group, i);
             }

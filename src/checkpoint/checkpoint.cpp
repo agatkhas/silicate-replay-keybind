@@ -163,7 +163,7 @@ void SavedPlayerCheckpoint::apply(PlayerObject* p) {
     p->m_maybeReverseAcceleration = m_maybeReverseAcceleration;
     p->m_xVelocityRelated2 = m_xVelocityRelated2;
     p->m_isDashing = m_isDashing;
-    p->m_unk9e8 = m_unk9e8;
+    p->m_dashFireFrame = m_unk9e8;
     p->m_groundObjectMaterial = m_groundObjectMaterial;
     p->m_vehicleSize = m_vehicleSize;
     p->m_playerSpeed = m_playerSpeed;
@@ -428,7 +428,7 @@ SavedPlayerCheckpoint SavedPlayerCheckpoint::create(PlayerObject* p) {
     c.m_maybeReverseAcceleration = p->m_maybeReverseAcceleration;
     c.m_xVelocityRelated2 = p->m_xVelocityRelated2;
     c.m_isDashing = p->m_isDashing;
-    c.m_unk9e8 = p->m_unk9e8;
+    c.m_unk9e8 = p->m_dashFireFrame;
     c.m_groundObjectMaterial = p->m_groundObjectMaterial;
     c.m_vehicleSize = p->m_vehicleSize;
     c.m_playerSpeed = p->m_playerSpeed;

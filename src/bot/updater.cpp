@@ -16,7 +16,6 @@
 #include "label/label.hpp"
 #include "render/renderer.hpp"
 #include "replay/system.hpp"
-#include "scheduler.hpp"
 #include "trajectory/trajectory.hpp"
 #include "util/midhook.hpp"
 #include "util/profile.hpp"
@@ -379,7 +378,7 @@ void BotUpdater::backwardsStep(int n) {
     }
 
     if (m_backwardsStepping->inner()) {
-        this->scheduleFrozenFunction([](float) {
+        this->scheduleFrozenFunction([n](float) {
           auto pl = PlayLayer::get();
           auto bot = Bot::get();
 
@@ -489,7 +488,7 @@ static void earlyUpdateMidhook(SafetyHookContext&) {
     }
 }
 
-static void frameUpdateMidhook(SafetyHookContext& ctx) {
+static void frameUpdateMidhook(SafetyHookContext&) {
     SCOPED_TIMER("frameUpdate")
 
     auto bot = Bot::get();

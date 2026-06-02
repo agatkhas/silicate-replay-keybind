@@ -47,7 +47,7 @@ struct SLPauseLayer : Modify<SLPauseLayer, PauseLayer> {
     }
 
 public:
-    void onSilicateOpen(CCObject* sender) {
+    void onSilicateOpen(CCObject*) {
         Bot::get()->ui().toggle();
     }
 };

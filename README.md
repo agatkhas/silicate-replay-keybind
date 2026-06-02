@@ -33,7 +33,7 @@ lib/
 ## Compiling
 
 1. Clone [`tabby`](https://github.com/silicate-bot/tabby) into lib/tabby. Make sure you're on the `legacy-v1` branch (until we migrate lol).
-2. Run `build.bat` or `build-rel.bat` if you're compiling for public use.
+2. Run `build.bat` or `build-rel.bat` if you're compiling for public use. (Use `build.sh` if you're on Linux!)
 
 ## Contributing
 

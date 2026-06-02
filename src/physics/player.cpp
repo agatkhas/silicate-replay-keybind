@@ -744,7 +744,7 @@ void updateJump(PlayerObject* player, float dt) {
     }
 }
 
-void playerUpdate(PlayerObject* player, float dt) {
+void playerUpdate(PlayerObject* player, float /* dt */) {
     player->m_yVelocity = clamp(player->m_yVelocity, -1000.0, 1000.0);
 
     if (player->m_isPlatformer) {

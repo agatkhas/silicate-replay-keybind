@@ -20,8 +20,8 @@ cocos2d::CCArray* getGroup(GJBaseGameLayer* pl, int groupID) {
     return group;
 }
 
-float redirectPlayerForce(PlayerObject* player, float force, float forceMod,
-float forceMin, float forceMax) {
+float redirectPlayerForce(PlayerObject* player, float force, float /* forceMod */,
+float /* forceMin */, float /* forceMax */) {
     // float forceSmaller = force * 0.01745329;
     cocos2d::CCPoint velocityCoords = cocos2d::CCPoint {
         (float)player->m_platformerXVelocity,

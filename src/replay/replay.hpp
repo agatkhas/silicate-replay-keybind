@@ -49,8 +49,8 @@ struct Replay {
     double m_fps = 240.0;
     size_t m_seed;
 
-    const double fps() const { return m_fps; }
-    const uint32_t length() const { return m_inputs.size(); }
+    double fps() const { return m_fps; }
+    uint32_t length() const { return m_inputs.size(); }
 
     Replay() = default;
     Replay(double fps) : m_fps(fps) {}

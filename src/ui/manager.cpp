@@ -34,7 +34,7 @@
 
 using namespace geode::prelude;
 
-UIManager::UIManager() : m_font(nullptr), m_bold(nullptr), m_medium(nullptr) {}
+UIManager::UIManager() : m_font(nullptr), m_medium(nullptr), m_bold(nullptr) {}
 
 void UIManager::toggle() { m_state.toggle(); }
 
@@ -298,7 +298,7 @@ static float getWindowDpi() {
 static std::string ffmpegUrl = "https://cdn.silicate.dev/ffmpeg.zip";
 
 void UIManager::setup() {
-    m_state.m_animationSpeed->handle([this](float& speed) {
+    m_state.m_animationSpeed->handle([](float& speed) {
         if (speed < 0.1f || speed > 3.0f) {
             speed = 1.0f;
         }
@@ -306,7 +306,7 @@ void UIManager::setup() {
         tabby::TabbyGlobalCfg::get().animationSpeed = speed;
     });
 
-    m_state.m_playAnimations->handle([this](bool& play) {
+    m_state.m_playAnimations->handle([](bool& play) {
         tabby::TabbyGlobalCfg::get().playAnimations = play;
     });
 
@@ -766,7 +766,7 @@ void UIManager::draw() {
                 auto pl = PlayLayer::get();
                 if (pl && bot->isRecording() && m_state.m_showExperimentalFeatures) {
                     if (tabby::button("Add TPS Change").pressed) {
-                        bot->replaySystem().m_actionAtom.addAction(bot->updater().getFrame(), bot->updater().getTps());
+                        (void)bot->replaySystem().m_actionAtom.addAction(bot->updater().getFrame(), bot->updater().getTps());
                         bot->updater().estimatedStepCount = 0;
                     }
                 }
@@ -1043,7 +1043,7 @@ void UIManager::draw() {
                     tabby::text("No replay loaded.");
                 }
 
-                for (int i = 0; i < inputs.size(); i++) {
+                for (int i = 0; i < (int)inputs.size(); i++) {
                     auto& input = inputs[i];
                     if (i == inputIndex) {
                         if (m_state.m_editIndex != inputIndex) {
@@ -1061,7 +1061,7 @@ void UIManager::draw() {
                             .changed) {
                         Bot::get()->updater().m_tps->notifyChange();
                         input.recalculateDelta(i == 0 ? 0 : inputs[i-1].m_frame);
-                        if (inputs.size() > i) {
+                        if ((int)inputs.size() > i) {
                             inputs[i+1].recalculateDelta(inputs[i].m_frame);
                         }
                     }
@@ -1086,7 +1086,7 @@ void UIManager::draw() {
                             }
 
                             if (tabby::button(std::string("Add Below##") + std::to_string(i)).pressed) {
-                                if (i+1 == inputs.size()) {
+                                if (i+1 == (int)inputs.size()) {
                                     inputs.push_back(
                                         slc::v3::Action(inputs[i].m_frame, 0, slc::v3::Action::ActionType::Jump, !inputs[i].m_holding, inputs[i].m_player2)
                                     );
@@ -1102,11 +1102,11 @@ void UIManager::draw() {
 
                             if (tabby::button(std::string("Remove##") + std::to_string(i)).pressed) {
                                 inputs.erase(inputs.begin() + i);
-                                if (inputs.size() > i) {
+                                if ((int)inputs.size() > i) {
                                     inputs[i].recalculateDelta(i == 0 ? 0 : inputs[i-1].m_frame);
                                 }
 
-                                if (inputs.size() > i + 1) {
+                                if ((int)inputs.size() > i + 1) {
                                     inputs[i+1].recalculateDelta(inputs[i].m_frame);
                                 }
                             }
@@ -1225,7 +1225,7 @@ void UIManager::draw() {
                         tabby::text("Waiting to enter level...");
                     } else if (PlayLayer::get()) {
                         if (tabby::button("Start Here").pressed) {
-                            renderer->start();
+                            (void)renderer->start();
                         }
                     }
                 }

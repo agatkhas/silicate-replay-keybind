@@ -201,7 +201,7 @@ void PracticeFix::updatePlatformerInputs(
     }
 }
 
-static const std::optional<slc::Action> findLastInputUnused(
+[[maybe_unused]] static std::optional<slc::Action> findLastInputUnused(
     const std::vector<slc::Action>& inputs, uint32_t frame, PlayerButton btn,
     bool p2) {
     const auto& last = std::find_if(

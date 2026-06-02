@@ -54,8 +54,6 @@ class Label {
     std::string m_friendly;
     std::function<std::string()> m_display;
 
-    bool m_inited = false;
-
     std::string m_font = "chatFont.fnt";
     CCPoint m_position = CCPoint(0.0f, 0.0f);
     CCPoint m_cocosAnchor = CCPoint(0.0f, 0.0f);

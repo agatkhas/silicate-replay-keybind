@@ -32,7 +32,7 @@ int checkPlayerCollisions(GJBaseGameLayer* gameLayer, PlayerObject* player) {
     if (player->m_unk669) {
         player->m_currentPotentialSlope = nullptr;
     }
-    GameObject* addedSlope;
+    [[maybe_unused]] GameObject* addedSlope;
     player->m_unk669 = true;
     player->m_potentialSlopeMap.clear();
     GameObject* currentSlope = player->m_currentPotentialSlope;
@@ -67,7 +67,7 @@ int checkPlayerCollisions(GJBaseGameLayer* gameLayer, PlayerObject* player) {
     // bool isOutOfBounds = player->m_isOutOfBounds;
     player->m_isOutOfBounds = false;
 
-    bool exceededBounds = false;
+    [[maybe_unused]] bool exceededBounds = false;
 
     if (gameLayer->m_isPlatformer) {
         auto playerPosition = player->getPosition();
@@ -113,8 +113,8 @@ int checkPlayerCollisions(GJBaseGameLayer* gameLayer, PlayerObject* player) {
 
 int collidedWithObjectInternal(PlayerObject* player, float,
                                GameObject* object, CCRect* p4, bool) {
-    bool holdingLeft = player->m_holdingLeft;
-    bool holdingRight = player->m_holdingLeft;
+    [[maybe_unused]] bool holdingLeft = player->m_holdingLeft;
+    [[maybe_unused]] bool holdingRight = player->m_holdingLeft;
     if (player->m_leftPressedFirst) {
         holdingRight = false;
     } else {
@@ -170,14 +170,14 @@ void preSlopeCollision(PlayerObject* player, float dt, GameObject* slope) {
 
     int slopeDir = slope->m_slopeDirection;
 
-    bool someBool = false;
+    [[maybe_unused]] bool someBool = false;
 
     bool unk1 = false;
     if ((slopeDir < 5) || slopeDir == 6) {
         unk1 = true;
     }
 
-    bool unk2 = false;
+    [[maybe_unused]] bool unk2 = false;
     if ((slopeDir < 7) && ((0x6aU >> (slopeDir & 0x1f) & 1) != 0)) {
         unk2 = true;
     }
@@ -338,10 +338,10 @@ void collisionCheckObjects(GJBaseGameLayer* pl, PlayerObject* player,
 
     CCRect playerRect = player->getObjectRect();
 
-    float playerMinX = player->getObjectRect().getMinX();
-    float playerMaxX = player->getObjectRect().getMaxX();
-    float playerMinY = player->getObjectRect().getMinY();
-    float playerMaxY = player->getObjectRect().getMaxY();
+    [[maybe_unused]] float playerMinX = player->getObjectRect().getMinX();
+    [[maybe_unused]] float playerMaxX = player->getObjectRect().getMaxX();
+    [[maybe_unused]] float playerMinY = player->getObjectRect().getMinY();
+    [[maybe_unused]] float playerMaxY = player->getObjectRect().getMaxY();
 
     for (int i = 0; i < objectCount; i++) {
         GameObject* object = objects->at(i);

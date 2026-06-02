@@ -14,7 +14,6 @@ constexpr uintptr_t TPS_STEPS_OFFSET = 0x6074e0;
 class BotUpdater {
    private:
     double m_fps = 240.0;
-    double m_updateOverflow = 0.0;
     uint32_t m_frame = 0;
 
     bool _stepOnce = false;

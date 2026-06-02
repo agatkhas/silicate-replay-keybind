@@ -134,10 +134,6 @@ struct SLPlayerObject : Modify<SLPlayerObject, PlayerObject> {
 
         auto bot = Bot::get();
         auto gjbgl = GJBaseGameLayer::get();
-        bool p1Holding = gjbgl->m_uiLayer->m_p1Jumping ||
-                         gjbgl->m_uiLayer->m_p1TouchId != -1;
-        bool p2Holding = gjbgl->m_uiLayer->m_p2Jumping ||
-                         gjbgl->m_uiLayer->m_p2TouchId != -1;
         if ((this == gjbgl->m_player2 && !gjbgl->m_gameState.m_isDualMode)
             || bot->updater().m_canDie->inner()
             || bot->isPlaying()

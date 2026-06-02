@@ -587,8 +587,8 @@ struct SLPlayLayer : Modify<SLPlayLayer, PlayLayer> {
         auto bot = Bot::get();
 
         using N = BotUpdater::NoclipType;
-        bool shouldDie = bot->updater().m_noclipType == N::Player1 && (player == m_player2) ||
-            bot->updater().m_noclipType == N::Player2 && (player == m_player1);
+        bool shouldDie = (bot->updater().m_noclipType == N::Player1 && (player == m_player2)) ||
+            (bot->updater().m_noclipType == N::Player2 && (player == m_player1));
 
         if (!bot->updater().m_noclip->inner() || shouldDie) {
             return PlayLayer::destroyPlayer(player, gameObject);
@@ -756,7 +756,7 @@ $execute {
         tulip::hook::TulipConvention::Default);
 }
 
-static void resetLevelSeedMidhook(SafetyHookContext& ctx) {
+static void resetLevelSeedMidhook(SafetyHookContext&) {
     if (!Bot::get()->isEnabled()) {
         return;  // don't modify rng
     }

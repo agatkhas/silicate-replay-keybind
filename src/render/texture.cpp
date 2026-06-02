@@ -17,7 +17,7 @@
 
 using namespace cocos2d;
 
-static void silentChangeSize(CCSize size, float wOffset, float hOffset) {
+static void silentChangeSize(CCSize size, float /* wOffset */, float /* hOffset */) {
     auto director = CCDirector::sharedDirector();
     auto view = CCEGLView::sharedOpenGLView();
     view->CCEGLViewProtocol::setFrameSize(size.width, size.height);

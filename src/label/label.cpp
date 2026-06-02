@@ -3,9 +3,7 @@
 #include <glaze/glaze.hpp>
 
 #include "bot/bot.hpp"
-#include "bot/tick.hpp"
 #include "bot/updater.hpp"
-#include "module/module.hpp"
 #include "replay/system.hpp"
 
 using namespace geode::prelude;
