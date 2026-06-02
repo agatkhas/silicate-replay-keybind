@@ -57,8 +57,13 @@ class BotUpdater {
         "updater.real_time", &SLSettings::get()->realTime);
     SLValuePtr<uint32_t> m_maxUPR = SLValue<uint32_t>::create(
         "updater.max_upr", &SLSettings::get()->maxUpr);
+    uint32_t m_stepLimit = 1;
     SLValuePtr<bool> m_useVisualUpdates = SLValue<bool>::create(
         "updater.visual_updates", &SLSettings::get()->useVisualUpdates);
+    SLValuePtr<bool> m_dynamicUpr = SLValue<bool>::create(
+        "updater.dynamic_upr", &SLSettings::get()->dynamicUpr);
+    SLValuePtr<double> m_fpsTarget = SLValue<double>::create(
+        "updater.fps_target", &SLSettings::get()->fpsTarget);
 
     SLValuePtr<bool> m_layoutMode = SLValue<bool>::create("updater.layout_mode", &_layoutMode);
 

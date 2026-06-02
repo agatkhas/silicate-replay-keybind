@@ -1503,13 +1503,20 @@ void UIManager::draw() {
 
                 tabby::checkbox("Real Time",
                                 bot->updater().m_realTime->inner());
-
+                
                 if (!bot->updater().m_realTime->inner()) {
-                    tabby::drag("Max UPR", bot->updater().m_maxUPR->inner(), 1u,
-                                1000000u, 1.0f);
+                    tabby::checkbox("Dynamic UPR",
+                                    bot->updater().m_dynamicUpr->inner());
 
-                    tabby::checkbox("Use Visual Updates",
-                                    bot->updater().m_useVisualUpdates->inner());
+                    if (bot->updater().m_dynamicUpr->inner()) {
+                      tabby::drag("Target FPS", bot->updater().m_fpsTarget->inner(), 1.0, 480.0, 1.0f, "{:.0f} FPS");
+                    } else {
+                      tabby::drag("Max UPR", bot->updater().m_maxUPR->inner(), 1u,
+                                  1000000u, 1.0f);
+
+                      tabby::checkbox("Use Visual Updates",
+                                      bot->updater().m_useVisualUpdates->inner());
+                    }
                 }
 
                 tabby::divider();

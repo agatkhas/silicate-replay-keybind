@@ -6,6 +6,7 @@
 #include <Geode/binding/GJBaseGameLayer.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
 #include <Geode/modify/PlayLayer.hpp>
+#include <chrono>
 #include <safetyhook.hpp>
 
 #include "Geode/cocos/CCScheduler.h"
@@ -45,7 +46,11 @@ void BotUpdater::calculateSteps(float dt, float targetDt) {
 
     int steps = std::floor(dt / wantedDt);
 
-    int stepLimit = m_maxUPR->inner();
+    if (!m_realTime->inner() && !m_dynamicUpr->inner()) {
+      m_stepLimit = m_maxUPR->inner();
+    }
+
+    int stepLimit = m_stepLimit;
 
     if (m_respawnTimer > 0) {
         // steps = 0;
@@ -54,7 +59,7 @@ void BotUpdater::calculateSteps(float dt, float targetDt) {
     }
 
     // Aka "how many steps can we take in one VISUAL frame"
-    if (m_useVisualUpdates->inner()) {
+    if (m_useVisualUpdates->inner() && !m_dynamicUpr->inner()) {
         float fps = GameManager::get()->m_customFPSTarget;
         if (fps <= 10.0) {
             fps = 240.0;
@@ -258,6 +263,7 @@ void BotUpdater::runUpdates(std::function<void(float)> update, float realDt,
         (m_lockDeltaMode->inner() == LockDeltaMode::Accuracy ||
          Renderer::get()->isRecording());
 
+    auto startTime = std::chrono::high_resolution_clock::now();
     if ((m_lockDelta->inner() || useAccLockDelta) && isPlayLayer) {
         if (this->useFastLockDelta()) {
             runFastLockDeltaUpdates(realDt, update);
@@ -280,6 +286,13 @@ void BotUpdater::runUpdates(std::function<void(float)> update, float realDt,
 
     bot->labels().update(disableLabels);
     bot->trajectory().update(PlayLayer::get());
+
+    auto endTime = std::chrono::high_resolution_clock::now();
+    double elapsedFrameTime = std::chrono::duration<float, std::milli>(endTime - startTime).count() / this->totalStepCount / 1000.0;
+    double dynamicDt = m_fpsTarget->inner() * elapsedFrameTime;
+    if (m_dynamicUpr->inner()) {
+      m_stepLimit = std::max(1, static_cast<int>(std::floor(1.0 / dynamicDt)));
+    }
 }
 
 void BotUpdater::breakLoop() {

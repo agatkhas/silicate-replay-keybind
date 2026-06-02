@@ -5,7 +5,7 @@
   },
   "id": "peony.silicate",
   "name": "Silicate",
-  "version": "v1.0.0-alpha.85",
+  "version": "v1.0.0-alpha.86",
   "developer": "peony",
   "description": "The silliest Geometry Dash bot.",
   "issues": {
@@ -14,7 +14,8 @@
   },
   "tags": ["cheat", "gameplay", "utility"],
   "links": {
-    "community": "https://discord.gg/y7xagk3C2m"
+    "community": "https://discord.gg/y7xagk3C2m",
+    "source": "https://git.silicate.dev/silicate/silicate"
   },
   "resources": {
     "files": [

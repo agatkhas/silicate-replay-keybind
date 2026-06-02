@@ -34,6 +34,8 @@ class SLSettings {
     bool realTime = true;
     uint32_t maxUpr = 10;
     bool useVisualUpdates = true;
+    bool dynamicUpr = true;
+    double fpsTarget = 60.0;
     bool lockDelta = true;
     int lockDeltaMode = 0;
 
