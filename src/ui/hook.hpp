@@ -8,15 +8,15 @@
 #endif
 
 // #include "backends/imgui_impl_opengl3.h"
-#include "../../lib/tabby/lib/imgui_lib/imgui.h"
 #include <Geode/Geode.hpp>
 #include <Geode/modify/CCEGLView.hpp>
 #include <tabby.hpp>
 
+#include "../../lib/tabby/lib/imgui_lib/imgui.h"
 #include "bot/bot.hpp"
 #include "render/pass.hpp"
-#include "ui/manager.hpp"
 #include "theme.hpp"
+#include "ui/manager.hpp"
 
 LRESULT CALLBACK h_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 

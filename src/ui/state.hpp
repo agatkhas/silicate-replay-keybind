@@ -10,7 +10,15 @@
 #include "../shared/value/value.hpp"
 
 struct UIState {
-    enum class UITab { Record, Assist, Prediction, Edit, Render, Scripts, Settings };
+    enum class UITab {
+        Record,
+        Assist,
+        Prediction,
+        Edit,
+        Render,
+        Scripts,
+        Settings
+    };
 
     SLValuePtr<bool> m_visible =
         SLValue<bool>::create("ui.visible", &SLSettings::get()->uiVisible);
@@ -156,32 +164,19 @@ struct UIState {
             },
     };
 
-
     using HitboxType = SLSettings::HitboxSettings::Type;
     tabby::DropdownState m_hitboxState = {
-        .options =
-        {
-            "Player",
-            "Inner Player",
-            "Rotated Player",
-            "Player (Circle)",
+        .options = {"Player", "Inner Player", "Rotated Player",
+                    "Player (Circle)",
 
-            "Solid",
-            "Hazard",
-            "Passable",
-            "Interactable"
-        },
+                    "Solid", "Hazard", "Passable", "Interactable"},
     };
     int m_hitboxCategories[8] = {
-        HitboxType::Player,
-        HitboxType::PlayerInner,
-        HitboxType::PlayerRotated,
-        HitboxType::PlayerCircle,
+        HitboxType::Player,        HitboxType::PlayerInner,
+        HitboxType::PlayerRotated, HitboxType::PlayerCircle,
 
-        HitboxType::Solid,
-        HitboxType::Hazard,
-        HitboxType::Passable,
-        HitboxType::Interactable,
+        HitboxType::Solid,         HitboxType::Hazard,
+        HitboxType::Passable,      HitboxType::Interactable,
     };
 
     tabby::ColorState m_hitboxColorState;

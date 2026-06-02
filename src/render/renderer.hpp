@@ -1,18 +1,19 @@
 #ifndef RENDERER_HPP
 #define RENDERER_HPP
 
-#include "texture.hpp"
-#include "../shared/value/value.hpp"
 #include "../settings/settings.hpp"
+#include "../shared/value/value.hpp"
 #include "ffmpeg.hpp"
+#include "texture.hpp"
 // #include "render_texture.hpp"
 // #include "dsp.hpp"
 
-#include <mutex>
-#include <string>
 #include <atomic>
 #include <glaze/glaze.hpp>
 #include <memory>
+#include <mutex>
+#include <string>
+
 #include "dsp.hpp"
 
 struct RendererSettings {
@@ -24,7 +25,7 @@ struct RendererSettings {
 
     int m_fps = 60;
 
-    float m_afterEndTime = 5.0f; // in seconds
+    float m_afterEndTime = 5.0f;  // in seconds
     bool m_colorFix = true;
 
     std::string m_outputPath = "output";
@@ -39,54 +40,46 @@ struct RendererSettings {
     bool m_firstAttemptPause = false;
 };
 
-template<>
+template <>
 struct glz::meta<RendererSettings> {
     using T = RendererSettings;
     static constexpr auto value = glz::object(
-        "width", &T::m_width,
-        "height", &T::m_height,
-        "bitrate", &T::m_bitrate,
-        "codec", &T::m_codec,
-        "pix_fmt", &T::m_pixFmt,
-        "fps", &T::m_fps,
-        "after_end_time", &T::m_afterEndTime,
-        "color_fix", &T::m_colorFix,
-        "render_args", &T::m_renderArgs,
-        "output_path", hide{&T::m_outputPath},
-        "music_volume", &T::m_musicVolume,
-        "sfx_volume", &T::m_sfxVolume,
-        "record_paused", &T::m_firstAttemptPause
-    );
+        "width", &T::m_width, "height", &T::m_height, "bitrate", &T::m_bitrate,
+        "codec", &T::m_codec, "pix_fmt", &T::m_pixFmt, "fps", &T::m_fps,
+        "after_end_time", &T::m_afterEndTime, "color_fix", &T::m_colorFix,
+        "render_args", &T::m_renderArgs, "output_path", hide{&T::m_outputPath},
+        "music_volume", &T::m_musicVolume, "sfx_volume", &T::m_sfxVolume,
+        "record_paused", &T::m_firstAttemptPause);
 };
 
-#define SL_AV_PTR(type) std::unique_ptr<type, void(*)(type*)>
+#define SL_AV_PTR(type) std::unique_ptr<type, void (*)(type*)>
 
-#define SL_AV_LEAK(type) \
-    [](type*) {}
+#define SL_AV_LEAK(type) [](type*) {}
 
 #define SL_AV_DELETER(type, deleteFunc) \
-    [&](type* ptr) { \
-        if (ptr) { \
-            deleteFunc(&ptr); \
-        } \
+    [&](type* ptr) {                    \
+        if (ptr) {                      \
+            deleteFunc(&ptr);           \
+        }                               \
     }
 
 #define SL_AV_DELETER2(type, deleteFunc) \
-    [&](type* ptr) { \
-        if (ptr) { \
-            deleteFunc(ptr); \
-        } \
+    [&](type* ptr) {                     \
+        if (ptr) {                       \
+            deleteFunc(ptr);             \
+        }                                \
     }
 
 class Renderer {
-public:
+   public:
     void queueStart() { m_shouldStart = true; }
     void startIfQueued() {
         if (m_shouldStart) {
             m_shouldStart = false;
             auto ret = start();
             if (ret.isErr()) {
-                geode::log::error("Failed to start recording: {}", ret.unwrapErr());
+                geode::log::error("Failed to start recording: {}",
+                                  ret.unwrapErr());
             }
         }
     }
@@ -104,9 +97,7 @@ public:
     void capture();
     void update(PlayLayer* pl);
 
-    void displayPreview() {
-        m_texture.displayPreview();
-    }
+    void displayPreview() { m_texture.displayPreview(); }
 
     RendererSettings m_settings;
 
@@ -143,15 +134,17 @@ public:
     std::atomic<bool> m_halting = false;
     std::atomic<bool> m_collected = false;
 
-    SLValuePtr<bool> m_autoVideoName = SLValue<bool>::create("renderer.auto_video_name", &SLSettings::get()->automaticVideoName);
-    SLValuePtr<std::string> m_videoNameTemplate = SLValue<std::string>::create("renderer.video_name_template", &SLSettings::get()->videoNameTemplate);
+    SLValuePtr<bool> m_autoVideoName = SLValue<bool>::create(
+        "renderer.auto_video_name", &SLSettings::get()->automaticVideoName);
+    SLValuePtr<std::string> m_videoNameTemplate = SLValue<std::string>::create(
+        "renderer.video_name_template", &SLSettings::get()->videoNameTemplate);
 
     double m_time = 0;
     bool m_needsCleanup = false;
     RenderTexture m_texture;
     ff_t* ff = 0;
 
-private:
+   private:
     // AVBufferRef* m_hwDeviceCtx = nullptr;
     // AVBufferRef* m_hwFramesCtx = nullptr;
     // const AVCodec* m_codec = nullptr;
@@ -173,10 +166,19 @@ private:
     // AVFilterContext* m_colorspaceCtx = nullptr;
     // AVBufferRef* m_frameBuffer = nullptr;
 
-    SL_AV_PTR(AVCodecContext) m_videoCodecCtx = {nullptr, SL_AV_LEAK(AVCodecContext)};
-    SL_AV_PTR(AVCodecContext) m_audioCodecCtx = {nullptr, SL_AV_LEAK(AVCodecContext)};
-    // SL_AV_PTR(AVFormatContext) m_formatCtx = {nullptr, SL_AV_DELETER2(AVFormatContext, avformat_free_context)};
-    AVFormatContext* m_formatCtx = nullptr; // managed by avformat_free_context
+    SL_AV_PTR(AVCodecContext)
+    m_videoCodecCtx = {
+        nullptr,
+        SL_AV_LEAK(AVCodecContext)
+    };
+    SL_AV_PTR(AVCodecContext)
+    m_audioCodecCtx = {
+        nullptr,
+        SL_AV_LEAK(AVCodecContext)
+    };
+    // SL_AV_PTR(AVFormatContext) m_formatCtx = {nullptr,
+    // SL_AV_DELETER2(AVFormatContext, avformat_free_context)};
+    AVFormatContext* m_formatCtx = nullptr;  // managed by avformat_free_context
 
     AVStream* m_videoStream = nullptr;
     AVStream* m_audioStream = nullptr;
@@ -186,11 +188,11 @@ private:
     const AVCodec* m_videoCodec = nullptr;
     const AVCodec* m_audioCodec = nullptr;
 
-    SL_AV_PTR(AVFrame) m_frame = {nullptr, SL_AV_LEAK(AVFrame)};
-    SL_AV_PTR(AVFrame) m_audioFrame = {nullptr, SL_AV_LEAK(AVFrame)};
+    SL_AV_PTR(AVFrame) m_frame = { nullptr, SL_AV_LEAK(AVFrame) };
+    SL_AV_PTR(AVFrame) m_audioFrame = { nullptr, SL_AV_LEAK(AVFrame) };
 
-    SL_AV_PTR(AVPacket) m_pkt = {nullptr, SL_AV_LEAK(AVPacket)};
-    SL_AV_PTR(AVPacket) m_audioPkt = {nullptr, SL_AV_LEAK(AVPacket)};
+    SL_AV_PTR(AVPacket) m_pkt = { nullptr, SL_AV_LEAK(AVPacket) };
+    SL_AV_PTR(AVPacket) m_audioPkt = { nullptr, SL_AV_LEAK(AVPacket) };
 
     float m_visualFps = 60.0f;
     bool m_recording = false;

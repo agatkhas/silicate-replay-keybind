@@ -1,8 +1,10 @@
 #include "theme.hpp"
-#include "hook.hpp"
-#include "bot/bot.hpp"
-#include "manager.hpp"
+
 #include <Geode/Geode.hpp>
+
+#include "bot/bot.hpp"
+#include "hook.hpp"
+#include "manager.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "lib/stb_image.h"
@@ -23,7 +25,9 @@ void main() {
 
 void Theme::initialize() {
     int width, height, channels;
-    uint8_t* data = stbi_load((geode::Mod::get()->getResourcesDir() / m_iconPath).string().c_str(), &width, &height, &channels, 0);
+    uint8_t* data = stbi_load(
+        (geode::Mod::get()->getResourcesDir() / m_iconPath).string().c_str(),
+        &width, &height, &channels, 0);
     if (!data) {
         return;
     }
@@ -37,17 +41,17 @@ void Theme::initialize() {
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     if (channels == 4) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA,
+                     GL_UNSIGNED_BYTE, data);
     }
     stbi_image_free(data);
 
-    m_postprocessPass = RenderPass{
-        .m_width = (unsigned int)ImGuiHookCtx::get().m_width,
-        .m_height = (unsigned int)ImGuiHookCtx::get().m_height,
-        .m_vertexShader = THEME_BASE_VERT,
-        .m_fragmentShader = m_postprocessShader.c_str(),
-        .m_readPixels = [](float, float) {}
-    };
+    m_postprocessPass =
+        RenderPass{.m_width = (unsigned int)ImGuiHookCtx::get().m_width,
+                   .m_height = (unsigned int)ImGuiHookCtx::get().m_height,
+                   .m_vertexShader = THEME_BASE_VERT,
+                   .m_fragmentShader = m_postprocessShader.c_str(),
+                   .m_readPixels = [](float, float) {}};
     m_postprocessPass.initialize();
 }
 
@@ -57,6 +61,4 @@ void Theme::resize(uint32_t width, uint32_t height) {
     m_postprocessPass.resize();
 }
 
-void Theme::apply() {
-    Bot::get()->ui().m_texture = m_texture;
-}
+void Theme::apply() { Bot::get()->ui().m_texture = m_texture; }

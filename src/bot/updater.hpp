@@ -65,7 +65,8 @@ class BotUpdater {
     SLValuePtr<double> m_fpsTarget = SLValue<double>::create(
         "updater.fps_target", &SLSettings::get()->fpsTarget);
 
-    SLValuePtr<bool> m_layoutMode = SLValue<bool>::create("updater.layout_mode", &_layoutMode);
+    SLValuePtr<bool> m_layoutMode =
+        SLValue<bool>::create("updater.layout_mode", &_layoutMode);
 
     double m_tpsOverflow = 0.0;
     bool m_shouldRender = true;
@@ -99,8 +100,8 @@ class BotUpdater {
     bool m_fullReset = false;
     float m_lastTfp = 0.0f;
 
-    SLValuePtr<bool> m_extrapolateFrames = SLValue<bool>::create(
-        "updater.frame_extrapolation", &_extrapolation);
+    SLValuePtr<bool> m_extrapolateFrames =
+        SLValue<bool>::create("updater.frame_extrapolation", &_extrapolation);
     cocos2d::CCPoint m_lastCameraPos;
     cocos2d::CCPoint m_currentCameraPos;
 
@@ -122,16 +123,13 @@ class BotUpdater {
 
     SLValuePtr<bool> m_predictBestPath =
         SLValue<bool>::create("updater.predict_best_path", &_predictBestPath);
-    SLValuePtr<bool> m_fullGamePrediction =
-        SLValue<bool>::create("updater.full_game_prediction", &SLSettings::get()->fullGamePrediction);
+    SLValuePtr<bool> m_fullGamePrediction = SLValue<bool>::create(
+        "updater.full_game_prediction", &SLSettings::get()->fullGamePrediction);
     SLValuePtr<float> m_acceptablePrediction =
-        SLValue<float>::create("updater.acceptable_prediction", &SLSettings::get()->acceptablePrediction);
+        SLValue<float>::create("updater.acceptable_prediction",
+                               &SLSettings::get()->acceptablePrediction);
 
-    enum class NoclipType {
-        Player1,
-        Player2,
-        Both
-    };
+    enum class NoclipType { Player1, Player2, Both };
 
     SLValuePtr<bool> m_noclip =
         SLValue<bool>::create("updater.noclip", &_noclip);

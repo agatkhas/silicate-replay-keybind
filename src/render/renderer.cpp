@@ -1,6 +1,7 @@
 #include "renderer.hpp"
 
 #include <Zydis/Zydis.h>
+#include <immintrin.h>
 
 #include <Geode/Geode.hpp>
 #include <Geode/modify/CCDirector.hpp>
@@ -9,21 +10,19 @@
 #include <Geode/modify/GJBaseGameLayer.hpp>
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/ShaderLayer.hpp>
+#include <iostream>
 #include <safetyhook.hpp>
 #include <string>
 #include <thread>
-#include <iostream>
-#include <immintrin.h>
 
 #include "bot/bot.hpp"
+#include "colorspace/nv12.hpp"
+#include "colorspace/rgb0.hpp"
+#include "colorspace/rgb24.hpp"
+#include "colorspace/yuv420p.hpp"
 #include "dsp.hpp"
 #include "replay/system.hpp"
 #include "ui/manager.hpp"
-
-#include "colorspace/nv12.hpp"
-#include "colorspace/yuv420p.hpp"
-#include "colorspace/rgb0.hpp"
-#include "colorspace/rgb24.hpp"
 
 using namespace geode::prelude;
 
@@ -66,7 +65,7 @@ static std::vector<RenderOpt> parseArgs(std::stringstream& in) {
             value.erase(value.size() - 1, value.size());
         }
 
-        opts.push_back(RenderOpt {
+        opts.push_back(RenderOpt{
             .m_name = name,
             .m_value = value,
         });
@@ -90,7 +89,9 @@ enum class GPUVendor {
 
 static GPUVendor getGPUVendor() {
     HKEY hKey;
-    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Enum\\PCI", 0, KEY_READ, &hKey) != ERROR_SUCCESS) {
+    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE,
+                      "SYSTEM\\CurrentControlSet\\Enum\\PCI", 0, KEY_READ,
+                      &hKey) != ERROR_SUCCESS) {
         geode::log::info("Detected no GPU - defaulting to libx264 (CPU)");
         return GPUVendor::OTHER;
     }
@@ -100,7 +101,8 @@ static GPUVendor getGPUVendor() {
 
     while (idx < 8192) {
         DWORD size = sizeof(subKeyName);
-        LONG result = RegEnumKeyExA(hKey, idx++, subKeyName, &size, nullptr, nullptr, nullptr, nullptr);
+        LONG result = RegEnumKeyExA(hKey, idx++, subKeyName, &size, nullptr,
+                                    nullptr, nullptr, nullptr);
 
         if (result != ERROR_SUCCESS) {
             break;
@@ -108,23 +110,20 @@ static GPUVendor getGPUVendor() {
 
         std::string keyName = subKeyName;
 
-        if (keyName.find("VEN_10DE") != std::string::npos)
-        {
+        if (keyName.find("VEN_10DE") != std::string::npos) {
             geode::log::info("Detected NVIDIA GPU - defaulting to h264_nvenc");
             RegCloseKey(hKey);
             return GPUVendor::NVIDIA;
         }
 
         if (keyName.find("VEN_1002") != std::string::npos ||
-            keyName.find("VEN_1022") != std::string::npos)
-        {
+            keyName.find("VEN_1022") != std::string::npos) {
             geode::log::info("Detected AMD GPU - defaulting to h264_amf");
             RegCloseKey(hKey);
             return GPUVendor::AMD;
         }
 
-        if (keyName.find("VEN_8086") != std::string::npos)
-        {
+        if (keyName.find("VEN_8086") != std::string::npos) {
             geode::log::info("Detected Intel GPU - defaulting to h264_qsv");
             RegCloseKey(hKey);
             return GPUVendor::INTEL;
@@ -137,16 +136,18 @@ static GPUVendor getGPUVendor() {
 
 static std::string getDefaultCodec() {
     switch (getGPUVendor()) {
-        case GPUVendor::NVIDIA: return "h264_nvenc";
-        case GPUVendor::AMD: return "h264_amf";
-        case GPUVendor::INTEL: return "h264_qsv";
-        default: return "libx264";
+        case GPUVendor::NVIDIA:
+            return "h264_nvenc";
+        case GPUVendor::AMD:
+            return "h264_amf";
+        case GPUVendor::INTEL:
+            return "h264_qsv";
+        default:
+            return "libx264";
     }
 }
 
-void Renderer::initializeDefaults() {
-    m_settings.m_codec = getDefaultCodec();
-}
+void Renderer::initializeDefaults() { m_settings.m_codec = getDefaultCodec(); }
 
 void Renderer::loadSettings(fs::path& path) {
     if (!fs::exists(path)) {
@@ -189,7 +190,9 @@ static void resizeShaderLayer(CCSize size, CCSize original) {
     CCDirector::get()->setContentScaleFactor(1.0);
     sh->m_renderTexture->release();
     sh->m_renderTexture = nullptr;
-    sh->m_renderTexture = CCRenderTexture::create(size.width / sh->m_aspectRatio * baseAspectRatio, size.height, kCCTexture2DPixelFormat_RGBA8888);
+    sh->m_renderTexture = CCRenderTexture::create(
+        size.width / sh->m_aspectRatio * baseAspectRatio, size.height,
+        kCCTexture2DPixelFormat_RGBA8888);
     sh->m_renderTexture->retain();
     CCDirector::get()->setContentScaleFactor(csf);
     sh->m_sprite->setTexture(sh->m_renderTexture->getSprite()->getTexture());
@@ -198,25 +201,20 @@ static void resizeShaderLayer(CCSize size, CCSize original) {
     sh->m_targetTextureSize = size;
     sh->m_targetTextureSizeExtra = CCSize(0.0f, 0.0f);
     if (baseAspectRatio > sh->m_aspectRatio) {
-        float calculatedWidth = size.width / sh->m_aspectRatio * baseAspectRatio;
-        sh->m_targetTextureSizeExtra = cocos2d::CCSize {
-            calculatedWidth - size.width,
-            0.0
-        };
+        float calculatedWidth =
+            size.width / sh->m_aspectRatio * baseAspectRatio;
+        sh->m_targetTextureSizeExtra =
+            cocos2d::CCSize{calculatedWidth - size.width, 0.0};
     } else if (baseAspectRatio < sh->m_aspectRatio) {
-        float calculatedHeight = size.height / sh->m_aspectRatio * baseAspectRatio;
-        sh->m_targetTextureSizeExtra = cocos2d::CCSize {
-            0.0,
-            calculatedHeight - size.height
-        };
+        float calculatedHeight =
+            size.height / sh->m_aspectRatio * baseAspectRatio;
+        sh->m_targetTextureSizeExtra =
+            cocos2d::CCSize{0.0, calculatedHeight - size.height};
     }
     geode::log::info("extra={}", sh->m_targetTextureSizeExtra);
-    sh->m_sprite->setTextureRect({
-        -1.0f + sh->m_targetTextureSizeExtra.width,
-        -1.0f + sh->m_targetTextureSizeExtra.height,
-        size.width + 2.0f,
-        size.height + 2.0f
-    });
+    sh->m_sprite->setTextureRect({-1.0f + sh->m_targetTextureSizeExtra.width,
+                                  -1.0f + sh->m_targetTextureSizeExtra.height,
+                                  size.width + 2.0f, size.height + 2.0f});
     sh->m_state.m_textureScaleX = size.width / winSize.width;
     sh->m_state.m_textureScaleY = size.height / winSize.height;
     geode::log::info("State texture scale: {}", sh->m_scaleFactor);
@@ -262,7 +260,7 @@ geode::Result<> Renderer::start() {
 
     {
         ff->avformat_alloc_output_context2(&m_formatCtx, nullptr, nullptr,
-                                       out.string().c_str());
+                                           out.string().c_str());
     }
     if (!m_formatCtx) {
         return geode::Err("Failed to allocate output context");
@@ -289,13 +287,8 @@ geode::Result<> Renderer::start() {
 
     m_settings.m_pixFmt = AV_PIX_FMT_NONE;
     if (ff->avcodec_get_supported_config(
-        m_videoCodecCtx.get(),
-        m_videoCodec,
-        AV_CODEC_CONFIG_PIX_FORMAT,
-        0,
-        (const void**)&outPixFmts,
-        &outPixFmtCount
-    ) < 0) {
+            m_videoCodecCtx.get(), m_videoCodec, AV_CODEC_CONFIG_PIX_FORMAT, 0,
+            (const void**)&outPixFmts, &outPixFmtCount) < 0) {
         return geode::Err("Failed to query codec pix fmt capabilities");
     }
 
@@ -304,33 +297,33 @@ geode::Result<> Renderer::start() {
         AVPixelFormat fmt = outPixFmts[i];
 
         switch (fmt) {
-        case AV_PIX_FMT_YUV420P: {
-            geode::log::info("Using (+) yuv420p");
-            m_settings.m_pixFmt = AV_PIX_FMT_YUV420P;
-            colorspace = std::make_unique<YUV420PColorspace>();
-            break;
-        }
-        case AV_PIX_FMT_NV12: {
-            geode::log::info("Using (+) nv12");
-            m_settings.m_pixFmt = AV_PIX_FMT_NV12;
-            colorspace = std::make_unique<NV12Colorspace>();
-            break;
-        }
-        case AV_PIX_FMT_RGB0: {
-            geode::log::info("Using (+) rgb0");
-            m_settings.m_pixFmt = AV_PIX_FMT_RGB0;
-            colorspace = std::make_unique<RGB0Colorspace>();
-            break;
-        }
-        case AV_PIX_FMT_RGB24: {
-            geode::log::info("Using (+) rgb24");
-            m_settings.m_pixFmt = AV_PIX_FMT_RGB24;
-            colorspace = std::make_unique<RGB24Colorspace>();
-            break;
-        }
-        default: {
-            break;
-        }
+            case AV_PIX_FMT_YUV420P: {
+                geode::log::info("Using (+) yuv420p");
+                m_settings.m_pixFmt = AV_PIX_FMT_YUV420P;
+                colorspace = std::make_unique<YUV420PColorspace>();
+                break;
+            }
+            case AV_PIX_FMT_NV12: {
+                geode::log::info("Using (+) nv12");
+                m_settings.m_pixFmt = AV_PIX_FMT_NV12;
+                colorspace = std::make_unique<NV12Colorspace>();
+                break;
+            }
+            case AV_PIX_FMT_RGB0: {
+                geode::log::info("Using (+) rgb0");
+                m_settings.m_pixFmt = AV_PIX_FMT_RGB0;
+                colorspace = std::make_unique<RGB0Colorspace>();
+                break;
+            }
+            case AV_PIX_FMT_RGB24: {
+                geode::log::info("Using (+) rgb24");
+                m_settings.m_pixFmt = AV_PIX_FMT_RGB24;
+                colorspace = std::make_unique<RGB24Colorspace>();
+                break;
+            }
+            default: {
+                break;
+            }
         }
 
         if (m_settings.m_pixFmt != AV_PIX_FMT_NONE) {
@@ -339,7 +332,9 @@ geode::Result<> Renderer::start() {
     }
 
     if (m_settings.m_pixFmt == AV_PIX_FMT_NONE) {
-        return geode::Err("couldn't find a proper pixel format to use for codec {}", m_settings.m_codec);
+        return geode::Err(
+            "couldn't find a proper pixel format to use for codec {}",
+            m_settings.m_codec);
     }
 
     m_videoCodecCtx->codec_id = m_videoCodec->id;
@@ -349,7 +344,7 @@ geode::Result<> Renderer::start() {
     m_videoCodecCtx->bit_rate = m_settings.m_bitrate;
     m_videoCodecCtx->time_base = {1, m_settings.m_fps};
     m_videoCodecCtx->framerate = {m_settings.m_fps, 1};
-    m_videoCodecCtx->max_b_frames = 0; // youtube doesn't like bframes at all
+    m_videoCodecCtx->max_b_frames = 0;  // youtube doesn't like bframes at all
 
     m_videoCodecCtx->color_primaries = AVCOL_PRI_BT709;
     m_videoCodecCtx->colorspace = AVCOL_SPC_BT709;
@@ -371,11 +366,13 @@ geode::Result<> Renderer::start() {
 
     for (const auto& arg : args) {
         geode::log::info("Applying args {}: {}", arg.m_name, arg.m_value);
-        ff->av_dict_set(&video_opts, arg.m_name.c_str(), arg.m_value.c_str(), 0);
+        ff->av_dict_set(&video_opts, arg.m_name.c_str(), arg.m_value.c_str(),
+                        0);
     }
 
     geode::log::info("Opening video codec `{}`...", m_settings.m_codec);
-    if (ff->avcodec_open2(m_videoCodecCtx.get(), m_videoCodec, &video_opts) < 0) {
+    if (ff->avcodec_open2(m_videoCodecCtx.get(), m_videoCodec, &video_opts) <
+        0) {
         return geode::Err("Failed to open codec");
     }
 
@@ -417,7 +414,7 @@ geode::Result<> Renderer::start() {
     }
 
     if (ff->avcodec_parameters_from_context(m_videoStream->codecpar,
-                                        m_videoCodecCtx.get()) < 0) {
+                                            m_videoCodecCtx.get()) < 0) {
         return geode::Err("Failed to copy codec parameters");
     }
 
@@ -428,7 +425,7 @@ geode::Result<> Renderer::start() {
     }
 
     if (ff->avcodec_parameters_from_context(m_audioStream->codecpar,
-                                        m_audioCodecCtx.get()) < 0) {
+                                            m_audioCodecCtx.get()) < 0) {
         return geode::Err("Failed to copy audio codec parameters");
     }
 
@@ -494,7 +491,8 @@ geode::Result<> Renderer::start() {
     m_alignedWidth = (m_settings.m_width + ALIGNMENT - 1) & ~(ALIGNMENT - 1);
     m_alignedHeight = (m_settings.m_height + ALIGNMENT - 1) & ~(ALIGNMENT - 1);
 
-    geode::log::info("Initializing capture with aligned size: {}x{}", m_alignedWidth, m_alignedHeight);
+    geode::log::info("Initializing capture with aligned size: {}x{}",
+                     m_alignedWidth, m_alignedHeight);
     m_texture.m_alignedWidth = m_alignedWidth;
     m_texture.m_alignedHeight = m_alignedHeight;
 
@@ -518,7 +516,8 @@ geode::Result<> Renderer::start() {
     m_audioStream->time_base = m_audioCodecCtx->time_base;
 
     AudioRecorder::get()->init();
-    AudioRecorder::get()->attach(m_settings.m_musicVolume, m_settings.m_sfxVolume);
+    AudioRecorder::get()->attach(m_settings.m_musicVolume,
+                                 m_settings.m_sfxVolume);
 
     std::thread(&Renderer::recordLoop, this).detach();
 
@@ -543,7 +542,7 @@ geode::Result<> Renderer::encode(uint8_t* data, size_t size) {
     }
 
     ff->av_image_fill_linesizes(m_frame->linesize, m_settings.m_pixFmt,
-                            m_alignedWidth);
+                                m_alignedWidth);
 
     auto result =
         m_texture.m_colorspace->prepareFrame(m_frame.get(), data, size);
@@ -580,7 +579,7 @@ geode::Result<> Renderer::write() {
         }
 
         ff->av_packet_rescale_ts(m_pkt.get(), m_videoCodecCtx->time_base,
-                             m_videoStream->time_base);
+                                 m_videoStream->time_base);
         m_pkt->stream_index = m_videoStream->index;
 
         ret = ff->av_interleaved_write_frame(m_formatCtx, m_pkt.get());
@@ -607,10 +606,10 @@ geode::Result<> Renderer::writeAudio(std::vector<float>& data, uint64_t pts) {
     ff->av_channel_layout_default(&inputChLayout, m_channels);
 
     if (!m_swrCtx) {
-        ret = ff->swr_alloc_set_opts2(&m_swrCtx, &m_audioCodecCtx->ch_layout,
-                                    m_audioCodecCtx->sample_fmt,
-                                    m_audioCodecCtx->sample_rate, &inputChLayout,
-                                    AV_SAMPLE_FMT_FLT, m_sampleRate, 0, nullptr);
+        ret = ff->swr_alloc_set_opts2(
+            &m_swrCtx, &m_audioCodecCtx->ch_layout, m_audioCodecCtx->sample_fmt,
+            m_audioCodecCtx->sample_rate, &inputChLayout, AV_SAMPLE_FMT_FLT,
+            m_sampleRate, 0, nullptr);
         if (ret < 0) {
             return geode::Err("Failed to set swr options: {}", ret);
         }
@@ -626,8 +625,7 @@ geode::Result<> Renderer::writeAudio(std::vector<float>& data, uint64_t pts) {
 
     const uint8_t* inData[1] = {reinterpret_cast<const uint8_t*>(data.data())};
     ff->swr_convert(m_swrCtx, m_audioFrame->data, m_audioCodecCtx->frame_size,
-                inData, m_audioCodecCtx->frame_size);
-
+                    inData, m_audioCodecCtx->frame_size);
 
     ret = ff->avcodec_send_frame(m_audioCodecCtx.get(), m_audioFrame.get());
     if (ret < 0) {
@@ -637,7 +635,8 @@ geode::Result<> Renderer::writeAudio(std::vector<float>& data, uint64_t pts) {
     // audioPkt is used here because it's encoding both audio and video
     // at the same time
     while (ret >= 0) {
-        ret = ff->avcodec_receive_packet(m_audioCodecCtx.get(), m_audioPkt.get());
+        ret =
+            ff->avcodec_receive_packet(m_audioCodecCtx.get(), m_audioPkt.get());
         if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
             break;
         } else if (ret < 0) {
@@ -645,7 +644,7 @@ geode::Result<> Renderer::writeAudio(std::vector<float>& data, uint64_t pts) {
         }
 
         ff->av_packet_rescale_ts(m_audioPkt.get(), m_audioCodecCtx->time_base,
-                             m_audioStream->time_base);
+                                 m_audioStream->time_base);
         m_audioPkt->stream_index = m_audioStream->index;
 
         ret = ff->av_interleaved_write_frame(m_formatCtx, m_audioPkt.get());
@@ -670,7 +669,7 @@ geode::Result<> Renderer::stop() {
         while (ff->avcodec_receive_packet(m_videoCodecCtx.get(), m_pkt.get()) ==
                0) {
             ff->av_packet_rescale_ts(m_pkt.get(), m_videoCodecCtx->time_base,
-                                 m_videoStream->time_base);
+                                     m_videoStream->time_base);
             m_pkt->stream_index = m_videoStream->index;
 
             int ret = ff->av_interleaved_write_frame(m_formatCtx, m_pkt.get());
@@ -685,12 +684,14 @@ geode::Result<> Renderer::stop() {
     if (m_audioPkt && m_audioCodecCtx && m_formatCtx && m_audioStream) {
         ff->avcodec_send_frame(m_audioCodecCtx.get(), nullptr);
         while (ff->avcodec_receive_packet(m_audioCodecCtx.get(),
-                                      m_audioPkt.get()) == 0) {
-            ff->av_packet_rescale_ts(m_audioPkt.get(), m_audioCodecCtx->time_base,
-                                 m_audioStream->time_base);
+                                          m_audioPkt.get()) == 0) {
+            ff->av_packet_rescale_ts(m_audioPkt.get(),
+                                     m_audioCodecCtx->time_base,
+                                     m_audioStream->time_base);
             m_audioPkt->stream_index = m_audioStream->index;
 
-            int ret = ff->av_interleaved_write_frame(m_formatCtx, m_audioPkt.get());
+            int ret =
+                ff->av_interleaved_write_frame(m_formatCtx, m_audioPkt.get());
             if (ret < 0) {
                 return geode::Err("Failed to write frame");
             }
@@ -719,7 +720,8 @@ geode::Result<> Renderer::stop() {
 
     ff->avio_close(m_formatCtx->pb);
     ff->swr_free(&m_swrCtx);
-    // avformat_free_context(m_formatCtx);  // only resource that's manually freed
+    // avformat_free_context(m_formatCtx);  // only resource that's manually
+    // freed
 
     m_texture.destroy();
 
@@ -765,8 +767,9 @@ void Renderer::capture() { m_texture.capture(&m_buffer, m_collected); }
 void Renderer::update(PlayLayer* pl) {
     if (!this->isRecording()) return;
 
-    bool started = pl->m_started || (m_settings.m_firstAttemptPause && m_seenFrames >= 2);
-    m_seenFrames++; // GD adds two "fade" frames
+    bool started =
+        pl->m_started || (m_settings.m_firstAttemptPause && m_seenFrames >= 2);
+    m_seenFrames++;  // GD adds two "fade" frames
     if (pl->m_isPaused || !started) return;
     if (m_halting || m_collected) return;
     m_halting = true;

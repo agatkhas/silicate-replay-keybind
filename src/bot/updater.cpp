@@ -47,7 +47,7 @@ void BotUpdater::calculateSteps(float dt, float targetDt) {
     int steps = std::floor(dt / wantedDt);
 
     if (!m_realTime->inner() && !m_dynamicUpr->inner()) {
-      m_stepLimit = m_maxUPR->inner();
+        m_stepLimit = m_maxUPR->inner();
     }
 
     int stepLimit = m_stepLimit;
@@ -64,7 +64,7 @@ void BotUpdater::calculateSteps(float dt, float targetDt) {
         if (fps <= 10.0) {
             fps = 240.0;
         }
-            
+
         int modifier = (int)m_tps->inner() / (int)fps;
 
         stepLimit *= std::max(1, modifier);
@@ -252,11 +252,10 @@ void BotUpdater::runUpdates(std::function<void(float)> update, float realDt,
 
     bool calculateSsb = false;
     if (isPlayLayer) {
-        calculateSsb =
-            !((PlayLayer*)pl)->m_isPaused &&
-            !((PlayLayer*)pl)->m_hasCompletedLevel && pl->m_started &&
-            !pl->m_isPlatformer && m_ssbFix->inner() &&
-            Renderer::get()->isRecording();
+        calculateSsb = !((PlayLayer*)pl)->m_isPaused &&
+                       !((PlayLayer*)pl)->m_hasCompletedLevel &&
+                       pl->m_started && !pl->m_isPlatformer &&
+                       m_ssbFix->inner() && Renderer::get()->isRecording();
     }
 
     bool useAccLockDelta =
@@ -377,7 +376,8 @@ uint32_t BotUpdater::getFrame() {
 
     // No intentional death in editor, use built in frame counter
     if (auto lel = LevelEditorLayer::get(); lel) {
-        return static_cast<uint32_t>(std::max(0, static_cast<int>(lel->m_gameState.m_currentProgress / 2) - 1));
+        return static_cast<uint32_t>(std::max(
+            0, static_cast<int>(lel->m_gameState.m_currentProgress / 2) - 1));
     }
 
     return 0;
@@ -399,20 +399,20 @@ void BotUpdater::backwardsStep(int n) {
 
     if (m_backwardsStepping->inner()) {
         this->scheduleFrozenFunction([n](float) {
-          auto pl = PlayLayer::get();
-          auto bot = Bot::get();
+            auto pl = PlayLayer::get();
+            auto bot = Bot::get();
 
-          for (int i = 0; i < n - 1; i++) {
-              bot->practiceFix().dropLastStoredFrame();
-          }
+            for (int i = 0; i < n - 1; i++) {
+                bot->practiceFix().dropLastStoredFrame();
+            }
 
-          if (bot->practiceFix().m_storedFrames.size() <= 1) {
-              return;
-          }
-          bot->practiceFix().m_loadCheckpoint = true;
-          bot->practiceFix().m_isBackstep = true;
-          pl->resetLevel();
-          bot->practiceFix().m_loadCheckpoint = false;
+            if (bot->practiceFix().m_storedFrames.size() <= 1) {
+                return;
+            }
+            bot->practiceFix().m_loadCheckpoint = true;
+            bot->practiceFix().m_isBackstep = true;
+            pl->resetLevel();
+            bot->practiceFix().m_loadCheckpoint = false;
         });
     }
 }
@@ -500,7 +500,8 @@ static void earlyUpdateMidhook(SafetyHookContext&) {
     PlayLayer* pl = PlayLayer::get();
     if (!pl) return;
 
-    if (!pl->m_playerDied && bot->updater().m_backwardsStepping->inner() && !Renderer::get()->isRecording()) {
+    if (!pl->m_playerDied && bot->updater().m_backwardsStepping->inner() &&
+        !Renderer::get()->isRecording()) {
         CheckpointObject* checkpoint = pl->createCheckpoint();
         checkpoint->retain();
         bot->practiceFix().saveState(
@@ -549,7 +550,8 @@ static void frameUpdateMidhook(SafetyHookContext&) {
                 }
 
                 if (bot->updater().m_autoFlipOnDeath->inner()) {
-                    pl->queueButton(1, !pl->m_player1->m_jumpBuffered, false, 0.0);
+                    pl->queueButton(1, !pl->m_player1->m_jumpBuffered, false,
+                                    0.0);
                     bot->updater().setPaused(false);
                 }
             }
@@ -568,7 +570,8 @@ static void frameUpdateMidhook(SafetyHookContext&) {
                 }
 
                 if (bot->updater().m_autoFlipOnDeath->inner()) {
-                    pl->queueButton(1, !pl->m_player2->m_jumpBuffered, true, 0.0);
+                    pl->queueButton(1, !pl->m_player2->m_jumpBuffered, true,
+                                    0.0);
                     bot->updater().setPaused(false);
                 }
             }
@@ -627,7 +630,8 @@ static void physStepCountMidhook(SafetyHookContext& ctx) {
     if (!fastBypass && PlayLayer::get()) return;
 
     // to explain what's going on here;
-    // basically the game does an incrementing step count up to but not including 2
+    // basically the game does an incrementing step count up to but not
+    // including 2
     //
     // the thing is, this can technically be negative
     // so for instance for a step count of 3
@@ -635,7 +639,7 @@ static void physStepCountMidhook(SafetyHookContext& ctx) {
     // so the steps are gonna be: -1, 0, 1 respectively
     //
     // thank you robtop :mending_heart:
-    ctx.rdx = 2 - bot->updater().estimatedStepCount; // lmao
+    ctx.rdx = 2 - bot->updater().estimatedStepCount;  // lmao
 }
 
 static void restorePhysDtHook(SafetyHookContext& ctx) {
@@ -648,17 +652,22 @@ static void restorePhysDtHook(SafetyHookContext& ctx) {
                       !bot->updater().m_lockDelta->inner();
     if (!fastBypass && PlayLayer::get()) return;
 
-    double newDt = bot->updater().getPhysicsDt() * bot->updater().estimatedStepCount;
+    double newDt =
+        bot->updater().getPhysicsDt() * bot->updater().estimatedStepCount;
 
     ctx.xmm9.f64[0] = newDt;
 }
 
 $execute {
     util::midhook(geode::base::get() + 0x237A7C, "physDt", physDtMidhook);
-    util::midhook(geode::base::get() + 0x237DCE, "physStepCount", physStepCountMidhook);
-    util::midhook(geode::base::get() + 0x238F6E, "restorePhysDt", restorePhysDtHook);
-    util::midhook(geode::base::get() + 0x237E42, "earlyUpdate", earlyUpdateMidhook);
-    util::midhook(geode::base::get() + 0x238BAA, "frameUpdate", frameUpdateMidhook);
+    util::midhook(geode::base::get() + 0x237DCE, "physStepCount",
+                  physStepCountMidhook);
+    util::midhook(geode::base::get() + 0x238F6E, "restorePhysDt",
+                  restorePhysDtHook);
+    util::midhook(geode::base::get() + 0x237E42, "earlyUpdate",
+                  earlyUpdateMidhook);
+    util::midhook(geode::base::get() + 0x238BAA, "frameUpdate",
+                  frameUpdateMidhook);
 
     Bot::get()->updater().m_speedhack->handle(
         [](double) { Bot::get()->updater().updateAudioSpeedhack(); });
@@ -679,7 +688,8 @@ $execute {
 
     Bot::get()->updater().m_stepBackwards->handle([](bool& paused) {
         auto pl = PlayLayer::get();
-        if (pl && paused && Bot::get()->practiceFix().canRestoreState() && !Renderer::get()->isRecording()) {
+        if (pl && paused && Bot::get()->practiceFix().canRestoreState() &&
+            !Renderer::get()->isRecording()) {
             Bot::get()->updater().backwardsStep();
         }
 

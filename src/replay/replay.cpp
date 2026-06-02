@@ -6,7 +6,7 @@
 #include "../util/try.hpp"
 
 [[nodiscard]] std::expected<Replay, Replay::Error> Replay::fromFile(
-    const std::filesystem::path &path) {
+    const std::filesystem::path& path) {
     std::ifstream file(path, std::ios::binary);
 
     Replay replay;
@@ -17,8 +17,9 @@
         TRY_WITH_ERR(Error::ReadError, file_read<uint32_t>(file));
 
     replay.m_inputs.resize(inputCount);
-    for (auto &input : replay.m_inputs) {
-        uint32_t state = TRY_WITH_ERR(Error::ReadError, file_read<uint32_t>(file));
+    for (auto& input : replay.m_inputs) {
+        uint32_t state =
+            TRY_WITH_ERR(Error::ReadError, file_read<uint32_t>(file));
         input = Replay::Input(state);
     }
 
@@ -46,7 +47,7 @@ std::expected<std::vector<uint8_t>, Replay::Error> Replay::toBytes() {
 }
 
 std::expected<void, Replay::Error> Replay::toFile(
-    const std::filesystem::path &path) {
+    const std::filesystem::path& path) {
     std::ofstream file(path, std::ios::binary);
 
     std::vector<uint8_t> bytes;
@@ -56,7 +57,7 @@ std::expected<void, Replay::Error> Replay::toFile(
         return std::unexpected(res.error());
     }
 
-    file.write((char *)bytes.data(), bytes.size());
+    file.write((char*)bytes.data(), bytes.size());
 
     return {};
 }

@@ -1,8 +1,8 @@
 #include <Geode/Geode.hpp>
 
 #include "bot/bot.hpp"
-#include "bot/updater.hpp"
 #include "bot/scheduler.hpp"
+#include "bot/updater.hpp"
 #include "render/renderer.hpp"
 
 using namespace geode::prelude;
@@ -26,7 +26,8 @@ struct SLCCDirector : Modify<SLCCDirector, CCDirector> {
         }
 
         if (renderer->isRecording() && !playLayer->m_isPaused &&
-            (playLayer->m_started || renderer->m_settings.m_firstAttemptPause)) {
+            (playLayer->m_started ||
+             renderer->m_settings.m_firstAttemptPause)) {
             float dt = Renderer::get()->getDt();
 
             SL_LOG_DEV("Checking if renderer collected in drawScene...");

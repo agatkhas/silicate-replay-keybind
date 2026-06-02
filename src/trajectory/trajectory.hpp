@@ -112,7 +112,7 @@ class Trajectory {
     }
 
     void scheduleAction(std::function<void()> action, int delay) {
-        m_actions.push_back(TrajectoryAction {
+        m_actions.push_back(TrajectoryAction{
             .m_delay = delay,
             .m_func = action,
         });
@@ -189,13 +189,18 @@ class Trajectory {
     void invalidateCache() { m_lastFrame = UINT64_MAX; }
     bool iterate(GJBaseGameLayer* pl, PlayerObject* player, int mode,
                  float* colors, bool& hasHeld,
-                 std::vector<TrajectoryPlayerData>& cached, PredictionConfig config);
+                 std::vector<TrajectoryPlayerData>& cached,
+                 PredictionConfig config);
 
-    TrajectoryPlayerData runPrediction(GJBaseGameLayer* pl, PlayerObject* player,
-                       PlayerObject* other, int mode, float* colors, bool both,
-                       CacheMap& cached, PredictionConfig config);
+    TrajectoryPlayerData runPrediction(GJBaseGameLayer* pl,
+                                       PlayerObject* player,
+                                       PlayerObject* other, int mode,
+                                       float* colors, bool both,
+                                       CacheMap& cached,
+                                       PredictionConfig config);
     TrajectoryPlayerData simulate(GJBaseGameLayer* pl, bool p1, int mode,
-                  bool clickBothPlayers, PredictionConfig config = PredictionConfig());
+                                  bool clickBothPlayers,
+                                  PredictionConfig config = PredictionConfig());
     void update(GJBaseGameLayer* pl);
     void handlePortal(PlayerObject* player, GameObject* object);
     void drawHitbox(PlayerObject* player);

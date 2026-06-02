@@ -24,20 +24,20 @@ using namespace geode::prelude;
 
 $execute {
     // Patch GJBaseGameLayer::resetLevelVariables to not release buttons
-    geode::log::info("Patching {} (GJBaseGameLayer::resetLevelVariables)", base::get() + 0x23B4EA);
+    geode::log::info("Patching {} (GJBaseGameLayer::resetLevelVariables)",
+                     base::get() + 0x23B4EA);
     if (!Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x23B4EA),
-                           {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 
-                            0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 
-                            0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 
-                            0x90, 0x90, 0x90, 0x90, 0x90, 0x90})) {
+                           {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
+                            0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
+                            0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90})) {
         geode::log::error(
             "Failed to patch GJBaseGameLayer::resetLevelVariables");
     }
 
-    if (!Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x4cd95c),
-                           {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 
-                            0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 
-                            0x90, 0x90, 0x90, 0x90, 0x90})) {
+    if (!Mod::get()->patch(
+            reinterpret_cast<void*>(base::get() + 0x4cd95c),
+            {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
+             0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90})) {
         geode::log::error("Failed to patch UILayer::handleKeypress");
     }
 
@@ -46,8 +46,8 @@ $execute {
         geode::log::error("Failed to patch PlayLayer::resetLevel");
     }
 
-    if (!Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x3BA508), 
-            {0x90, 0x90, 0x90, 0x90, 0x90})) {
+    if (!Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x3BA508),
+                           {0x90, 0x90, 0x90, 0x90, 0x90})) {
         geode::log::error("Failed to patch PlayLayer::resumeAndRestart");
     }
 }
@@ -100,8 +100,11 @@ struct SLGJBaseGameLayer : Modify<SLGJBaseGameLayer, GJBaseGameLayer> {
     };
 
     static void onModify(auto& self) {
-        if (!self.setHookPriorityPre("GJBaseGameLayer::handleButton", Priority::Last)) {
-            geode::log::warn("Failed to set priority for handleButton! Alt hook may not work as expected");
+        if (!self.setHookPriorityPre("GJBaseGameLayer::handleButton",
+                                     Priority::Last)) {
+            geode::log::warn(
+                "Failed to set priority for handleButton! Alt hook may not "
+                "work as expected");
         }
     }
 
@@ -128,33 +131,43 @@ struct SLGJBaseGameLayer : Modify<SLGJBaseGameLayer, GJBaseGameLayer> {
 
         // predict player 1 and player 2 positions in next frame
         Mode m = m_player1->m_jumpBuffered ? Mode::Hold : Mode::Release;
-        auto prediction = t->simulate(this, true, Mode::Player1 | m, true, {
-            .m_bypassConfig = true,
-            .m_maxLength = 0,
-        });
+        auto prediction = t->simulate(this, true, Mode::Player1 | m, true,
+                                      {
+                                          .m_bypassConfig = true,
+                                          .m_maxLength = 0,
+                                      });
 
         Mode m2 = m_player2->m_jumpBuffered ? Mode::Hold : Mode::Release;
-        auto prediction2 = t->simulate(this, true, Mode::Player2 | m2, true, {
-            .m_bypassConfig = true,
-            .m_maxLength = 0,
-        });
+        auto prediction2 = t->simulate(this, true, Mode::Player2 | m2, true,
+                                       {
+                                           .m_bypassConfig = true,
+                                           .m_maxLength = 0,
+                                       });
 
-        // % of current frame "completion" - if halfway between this and next frame, this is 0.5
+        // % of current frame "completion" - if halfway between this and next
+        // frame, this is 0.5
         float framePosition = updater.m_tpsOverflow / updater.getPhysicsDt();
 
         // lerp positions based on frame position
-        CCPoint lerped = prediction.position * framePosition + m_player1->m_position * (1 - framePosition);
-        float lerpedRot = prediction.rotation * framePosition + m_fields->m_lastActualP1.m_rotation * (1 - framePosition);
+        CCPoint lerped = prediction.position * framePosition +
+                         m_player1->m_position * (1 - framePosition);
+        float lerpedRot =
+            prediction.rotation * framePosition +
+            m_fields->m_lastActualP1.m_rotation * (1 - framePosition);
 
-        CCPoint lerped2 = prediction2.position * framePosition + m_player2->m_position * (1 - framePosition);
-        float lerpedRot2 = prediction2.rotation * framePosition + m_fields->m_lastActualP2.m_rotation * (1 - framePosition);
+        CCPoint lerped2 = prediction2.position * framePosition +
+                          m_player2->m_position * (1 - framePosition);
+        float lerpedRot2 =
+            prediction2.rotation * framePosition +
+            m_fields->m_lastActualP2.m_rotation * (1 - framePosition);
 
         this->m_player1->setPosition(lerped);
         this->m_player2->setPosition(lerped2);
         this->m_player1->setRotation(lerpedRot);
         this->m_player2->setRotation(lerpedRot2);
 
-        // update gjbgl (updateCamera only sets gameState variables so it's easily restorable)
+        // update gjbgl (updateCamera only sets gameState variables so it's
+        // easily restorable)
         this->updateCamera(dt60);
         this->updateVisibility(dt);
 
@@ -189,14 +202,15 @@ struct SLGJBaseGameLayer : Modify<SLGJBaseGameLayer, GJBaseGameLayer> {
             updater.calculateSteps(dt, updater.getPhysicsDt());
         }
 
-
         if (updater.m_respawnTimer > 0) {
             updater.m_respawnTimer--;
             updater.totalStepCount = std::min(updater.totalStepCount, 1);
-            updater.estimatedStepCount = std::min(updater.estimatedStepCount, 1);
+            updater.estimatedStepCount =
+                std::min(updater.estimatedStepCount, 1);
         }
 
-        if (updater.m_extrapolateFrames->inner() && updater.getFrame() > updater.m_frameOnLastAttempt) {
+        if (updater.m_extrapolateFrames->inner() &&
+            updater.getFrame() > updater.m_frameOnLastAttempt) {
             if (this->shouldExtrapolate()) {
                 this->extrapolateVisualUpdates(dt);
             } else {
@@ -210,7 +224,6 @@ struct SLGJBaseGameLayer : Modify<SLGJBaseGameLayer, GJBaseGameLayer> {
                 this->storeActualState();
             }
         }
-
     }
 
     void gameEventTriggered(GJGameEvent event, int p1, int p2) {
@@ -236,7 +249,8 @@ struct SLGJBaseGameLayer : Modify<SLGJBaseGameLayer, GJBaseGameLayer> {
     }
 
     void updateCamera(float dt) {
-        Bot::get()->updater().m_lastCameraPos = Bot::get()->updater().m_currentCameraPos;
+        Bot::get()->updater().m_lastCameraPos =
+            Bot::get()->updater().m_currentCameraPos;
         GJBaseGameLayer::updateCamera(dt);
         Bot::get()->updater().m_currentCameraPos = m_objectLayer->getPosition();
     }
@@ -361,10 +375,8 @@ struct SLGJBaseGameLayer : Modify<SLGJBaseGameLayer, GJBaseGameLayer> {
 
     void handleButton(bool pressed, int button, bool player1) {
         auto bot = Bot::get();
-        if (
-            !bot->replaySystem().m_useAlternateHook->inner() ||
-            !bot->isRecording()
-        ) {
+        if (!bot->replaySystem().m_useAlternateHook->inner() ||
+            !bot->isRecording()) {
             return GJBaseGameLayer::handleButton(pressed, button, player1);
         }
 
@@ -423,7 +435,8 @@ struct SLGJBaseGameLayer : Modify<SLGJBaseGameLayer, GJBaseGameLayer> {
         }
 
         this->queueButton(button, action.m_holding,
-                          bot->replaySystem().playerFlipped(action.m_player2), 0);
+                          bot->replaySystem().playerFlipped(action.m_player2),
+                          0);
     }
 
     void performAutoFlipOnDeath() {
@@ -445,13 +458,12 @@ struct SLGJBaseGameLayer : Modify<SLGJBaseGameLayer, GJBaseGameLayer> {
         }
 
         if (this->m_player1->m_jumpBuffered != bot->updater().m_isAutoFlipped) {
-            m_queuedButtons.push_back({
-                .m_button = (PlayerButton)1,
-                .m_isPush = bot->updater().m_isAutoFlipped,
-                .m_isPlayer2 = false,
-                .m_step = 0,
-                .m_timestamp = 0.0
-            });
+            m_queuedButtons.push_back(
+                {.m_button = (PlayerButton)1,
+                 .m_isPush = bot->updater().m_isAutoFlipped,
+                 .m_isPlayer2 = false,
+                 .m_step = 0,
+                 .m_timestamp = 0.0});
         }
     }
 
@@ -468,7 +480,6 @@ struct SLGJBaseGameLayer : Modify<SLGJBaseGameLayer, GJBaseGameLayer> {
         }
 
         if (bot->isRecording()) {
-
             if (bot->replaySystem().m_maintainGravity) {
                 this->performMaintainGravity();
                 return;
@@ -559,18 +570,19 @@ struct SLGJBaseGameLayer : Modify<SLGJBaseGameLayer, GJBaseGameLayer> {
     }
 
     void processMoveActionsStep(float dt, bool visibleFrame) {
-        const auto& randomHashObject = [](GameObject* object, int group, int index) {
+        const auto& randomHashObject = [](GameObject* object, int group,
+                                          int index) {
             return (Bot::get()->replaySystem().m_startingSeed *
-                (int)(object->m_objectID + 5541) *
-                (int)(fabs(object->m_startPosition.x) + 1.0) *
-                (int)(fabs(object->m_startPosition.y) + 1.0) *
-                ((int)object->m_zLayer + 2137) *
-                (object->m_groupCount + 6969) *
-                ((int)object->m_isObjectBlack * 420 + 14) *
-                ((int)(fabs(object->m_startRotationX) * 6.7 + 1.0)
-                * (index + 67))
-                * (group + 2137)
-            ) % 1777;
+                    (int)(object->m_objectID + 5541) *
+                    (int)(fabs(object->m_startPosition.x) + 1.0) *
+                    (int)(fabs(object->m_startPosition.y) + 1.0) *
+                    ((int)object->m_zLayer + 2137) *
+                    (object->m_groupCount + 6969) *
+                    ((int)object->m_isObjectBlack * 420 + 14) *
+                    ((int)(fabs(object->m_startRotationX) * 6.7 + 1.0) *
+                     (index + 67)) *
+                    (group + 2137)) %
+                   1777;
         };
 
         const auto& updateAllObjectsForGroup = [&, this](int group) {
@@ -616,7 +628,8 @@ struct SLGJBaseGameLayer : Modify<SLGJBaseGameLayer, GJBaseGameLayer> {
 
     void createMiddleground(int mg) {
         auto bot = Bot::get();
-        if (!bot->isEnabled() || !bot->updater().m_layoutMode->inner() || LevelEditorLayer::get()) {
+        if (!bot->isEnabled() || !bot->updater().m_layoutMode->inner() ||
+            LevelEditorLayer::get()) {
             GJBaseGameLayer::createMiddleground(mg);
         } else {
             if (m_middleground) {
@@ -642,22 +655,26 @@ struct SLGJBaseGameLayer : Modify<SLGJBaseGameLayer, GJBaseGameLayer> {
     }
 
     // :(
-    void updateColor(cocos2d::ccColor3B& color, float fadeTime, int colorID, bool blending, float opacity, cocos2d::ccHSVValue& copyHSV, int colorIDToCopy, bool copyOpacity, EffectGameObject* callerObject, int unk1, int unk2) override {
-        if (!LevelEditorLayer::get() &&
-            Bot::get()->isEnabled() &&
+    void updateColor(cocos2d::ccColor3B& color, float fadeTime, int colorID,
+                     bool blending, float opacity, cocos2d::ccHSVValue& copyHSV,
+                     int colorIDToCopy, bool copyOpacity,
+                     EffectGameObject* callerObject, int unk1,
+                     int unk2) override {
+        if (!LevelEditorLayer::get() && Bot::get()->isEnabled() &&
             Bot::get()->updater().m_layoutMode->inner()) {
             return;
         }
 
-        GJBaseGameLayer::updateColor(color, fadeTime, colorID, blending, opacity, copyHSV, colorIDToCopy, copyOpacity, callerObject, unk1, unk2);
+        GJBaseGameLayer::updateColor(color, fadeTime, colorID, blending,
+                                     opacity, copyHSV, colorIDToCopy,
+                                     copyOpacity, callerObject, unk1, unk2);
     }
 
     void triggerGradientCommand(GradientTriggerObject* obj) {
-        if (!LevelEditorLayer::get() &&
-            Bot::get()->isEnabled() &&
+        if (!LevelEditorLayer::get() && Bot::get()->isEnabled() &&
             Bot::get()->updater().m_layoutMode->inner()) {
             return;
-            }
+        }
 
         GJBaseGameLayer::triggerGradientCommand(obj);
     }
@@ -676,11 +693,16 @@ static void overrideCheckpointPlacement(SafetyHookContext& ctx) {
 }
 
 $execute {
-    util::midhook(geode::base::get() + 0x23E173, "shakeRandomOverride", shakeRandomOverride);
-    util::midhook(geode::base::get() + 0x23E1A1, "shakeRandomOverride", shakeRandomOverride);
-    util::midhook(geode::base::get() + 0x23E1CB, "shakeRandomOverride", shakeRandomOverride);
-    util::midhook(geode::base::get() + 0x23E1E9, "shakeRandomOverride", shakeRandomOverride);
-    util::midhook(geode::base::get() + 0x3A3657, "checkpointPlacement", overrideCheckpointPlacement);
+    util::midhook(geode::base::get() + 0x23E173, "shakeRandomOverride",
+                  shakeRandomOverride);
+    util::midhook(geode::base::get() + 0x23E1A1, "shakeRandomOverride",
+                  shakeRandomOverride);
+    util::midhook(geode::base::get() + 0x23E1CB, "shakeRandomOverride",
+                  shakeRandomOverride);
+    util::midhook(geode::base::get() + 0x23E1E9, "shakeRandomOverride",
+                  shakeRandomOverride);
+    util::midhook(geode::base::get() + 0x3A3657, "checkpointPlacement",
+                  overrideCheckpointPlacement);
 
     Bot::get()->updater().m_lockDelta->handle(
         [](bool&) { Bot::get()->updater().m_tpsOverflow = 0.0; });

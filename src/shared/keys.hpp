@@ -1,6 +1,6 @@
 /**
  * This file is a whole mess of constants and definitions.
- * 
+ *
  * Continue at your own risk.
  */
 
@@ -88,7 +88,7 @@
 //         case enumKeyCodes::KEY_CapsLock: return ImGuiKey_CapsLock;
 //         case enumKeyCodes::KEY_Numlock: return ImGuiKey_NumLock;
 //     }
-    
+
 //     return ImGuiKey_COUNT;
 // }
 
@@ -151,23 +151,24 @@
 
 //         case ImGuiKey_Tab: return cocos2d::enumKeyCodes::KEY_Tab;
 //         case ImGuiKey_LeftArrow: return cocos2d::enumKeyCodes::KEY_ArrowLeft;
-//         case ImGuiKey_RightArrow: return cocos2d::enumKeyCodes::KEY_ArrowRight;
-//         case ImGuiKey_UpArrow: return cocos2d::enumKeyCodes::KEY_ArrowUp;
-//         case ImGuiKey_DownArrow: return cocos2d::enumKeyCodes::KEY_ArrowDown;
-//         case ImGuiKey_Space: return cocos2d::enumKeyCodes::KEY_Space;
-//         case ImGuiKey_Enter: return cocos2d::enumKeyCodes::KEY_Enter;
-//         case ImGuiKey_Escape: return cocos2d::enumKeyCodes::KEY_Escape;
-//         case ImGuiKey_Delete: return cocos2d::enumKeyCodes::KEY_Delete;
-//         case ImGuiKey_Backspace: return cocos2d::enumKeyCodes::KEY_Backspace;
-//         case ImGuiKey_Home: return cocos2d::enumKeyCodes::KEY_Home;
-//         case ImGuiKey_End: return cocos2d::enumKeyCodes::KEY_End;
-//         case ImGuiKey_PageUp: return cocos2d::enumKeyCodes::KEY_PageUp;
-//         case ImGuiKey_PageDown: return cocos2d::enumKeyCodes::KEY_PageDown;
-//         case ImGuiKey_Insert: return cocos2d::enumKeyCodes::KEY_Insert;
-//         case ImGuiKey_Pause: return cocos2d::enumKeyCodes::KEY_Pause;
-//         case ImGuiKey_ScrollLock: return cocos2d::enumKeyCodes::KEY_ScrollLock;
-//         case ImGuiKey_CapsLock: return cocos2d::enumKeyCodes::KEY_CapsLock;
-//         case ImGuiKey_NumLock: return cocos2d::enumKeyCodes::KEY_Numlock;
+//         case ImGuiKey_RightArrow: return
+//         cocos2d::enumKeyCodes::KEY_ArrowRight; case ImGuiKey_UpArrow: return
+//         cocos2d::enumKeyCodes::KEY_ArrowUp; case ImGuiKey_DownArrow: return
+//         cocos2d::enumKeyCodes::KEY_ArrowDown; case ImGuiKey_Space: return
+//         cocos2d::enumKeyCodes::KEY_Space; case ImGuiKey_Enter: return
+//         cocos2d::enumKeyCodes::KEY_Enter; case ImGuiKey_Escape: return
+//         cocos2d::enumKeyCodes::KEY_Escape; case ImGuiKey_Delete: return
+//         cocos2d::enumKeyCodes::KEY_Delete; case ImGuiKey_Backspace: return
+//         cocos2d::enumKeyCodes::KEY_Backspace; case ImGuiKey_Home: return
+//         cocos2d::enumKeyCodes::KEY_Home; case ImGuiKey_End: return
+//         cocos2d::enumKeyCodes::KEY_End; case ImGuiKey_PageUp: return
+//         cocos2d::enumKeyCodes::KEY_PageUp; case ImGuiKey_PageDown: return
+//         cocos2d::enumKeyCodes::KEY_PageDown; case ImGuiKey_Insert: return
+//         cocos2d::enumKeyCodes::KEY_Insert; case ImGuiKey_Pause: return
+//         cocos2d::enumKeyCodes::KEY_Pause; case ImGuiKey_ScrollLock: return
+//         cocos2d::enumKeyCodes::KEY_ScrollLock; case ImGuiKey_CapsLock: return
+//         cocos2d::enumKeyCodes::KEY_CapsLock; case ImGuiKey_NumLock: return
+//         cocos2d::enumKeyCodes::KEY_Numlock;
 //     }
 //     return cocos2d::enumKeyCodes::KEY_None; // Default case for unmapped keys
 // }

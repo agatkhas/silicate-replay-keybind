@@ -231,8 +231,8 @@ class SLValue : public KeybindContainer<T>, public SLBindingInterface {
     }
 
     std::shared_ptr<KeybindControl> createKeybind(RawKeybind& kb) override {
-        return SLKeybind<T>::createFromString(kb.m_valueTag, kb.m_key, kb.m_type,
-                                            kb.m_value, kb.m_modifiers);
+        return SLKeybind<T>::createFromString(
+            kb.m_valueTag, kb.m_key, kb.m_type, kb.m_value, kb.m_modifiers);
     }
 };
 

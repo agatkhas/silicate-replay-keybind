@@ -3,8 +3,8 @@
 
 #include <Geode/Geode.hpp>
 #include <functional>
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 
 using namespace cocos2d;
@@ -16,8 +16,8 @@ class RawLabel {
     std::string m_font;
     int m_anchor = 0;
 
-    RawLabel(std::string id, std::function<std::string()> display, std::string font, 
-             int anchor = 0) {
+    RawLabel(std::string id, std::function<std::string()> display,
+             std::string font, int anchor = 0) {
         m_id = id;
         m_display = display;
         m_font = font;
@@ -49,6 +49,7 @@ class Label {
     };
 
     LabelConfig m_config;
+
    private:
     std::string m_id;
     std::string m_friendly;
@@ -60,12 +61,8 @@ class Label {
 
    public:
     Label() = default;
-    Label(
-        std::string id,
-        std::string friendly,
-        std::function<std::string()> display, 
-        LabelConfig cfg
-    ) {
+    Label(std::string id, std::string friendly,
+          std::function<std::string()> display, LabelConfig cfg) {
         m_id = id;
         m_friendly = friendly;
         m_display = display;
@@ -83,19 +80,11 @@ class Label {
 
     void calculatePosition(float& currentHeight, CCLabelBMFont* label);
 
-    void update(
-        bool forceDisable, 
-        bool refresh,
-        float& currentHeight
-    );
+    void update(bool forceDisable, bool refresh, float& currentHeight);
 
-    const std::string& getId() const {
-        return m_id;
-    }
+    const std::string& getId() const { return m_id; }
 
-    const std::string& getFriendlyName() const {
-        return m_friendly;
-    }
+    const std::string& getFriendlyName() const { return m_friendly; }
 };
 
 class LabelManager {
@@ -104,9 +93,10 @@ class LabelManager {
     bool m_requiresRefresh = false;
     bool m_globalEnabled = true;
 
-    template<typename F>
+    template <typename F>
         requires std::is_invocable_r_v<std::string, F>
-    void addLabel(std::string id, std::string friendly, F display, Label::LabelConfig cfg) {
+    void addLabel(std::string id, std::string friendly, F display,
+                  Label::LabelConfig cfg) {
         m_labels.push_back(Label(id, friendly, display, cfg));
     }
 

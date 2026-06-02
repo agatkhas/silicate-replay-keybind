@@ -2,8 +2,8 @@
 #include <Geode/binding/EditorPauseLayer.hpp>
 #include <Geode/modify/EditorPauseLayer.hpp>
 
-#include "bot/bot.hpp"
 #include "assist/hitboxes.hpp"
+#include "bot/bot.hpp"
 #include "trajectory/trajectory.hpp"
 
 using namespace geode::prelude;

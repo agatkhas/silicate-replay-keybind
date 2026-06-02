@@ -12,10 +12,14 @@ struct HitboxTrailUnit {
 
     // inline this shit
     inline bool shouldDraw(float minX, float maxX, float minY, float maxY);
-    void draw(cocos2d::CCDrawNode* node, float width, float* colors, float fillOpacity);
-    void drawRotated(cocos2d::CCDrawNode* node, float width, float* colors, float fillOpacity);
-    void drawInner(cocos2d::CCDrawNode* node, float width, float* colors, float fillOpacity);
-    void drawCircle(cocos2d::CCDrawNode* node, float width, float* colors, float fillOpacity);
+    void draw(cocos2d::CCDrawNode* node, float width, float* colors,
+              float fillOpacity);
+    void drawRotated(cocos2d::CCDrawNode* node, float width, float* colors,
+                     float fillOpacity);
+    void drawInner(cocos2d::CCDrawNode* node, float width, float* colors,
+                   float fillOpacity);
+    void drawCircle(cocos2d::CCDrawNode* node, float width, float* colors,
+                    float fillOpacity);
 };
 
 class Hitboxes {

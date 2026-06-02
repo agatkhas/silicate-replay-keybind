@@ -1,7 +1,7 @@
 
-#include <Geode/Geode.hpp>
-
 #include "gjbasegamelayer.hpp"
+
+#include <Geode/Geode.hpp>
 
 namespace phys {
 cocos2d::CCArray* getGroup(GJBaseGameLayer* pl, int groupID) {
@@ -20,25 +20,24 @@ cocos2d::CCArray* getGroup(GJBaseGameLayer* pl, int groupID) {
     return group;
 }
 
-float redirectPlayerForce(PlayerObject* player, float force, float /* forceMod */,
-float /* forceMin */, float /* forceMax */) {
+float redirectPlayerForce(PlayerObject* player, float force,
+                          float /* forceMod */, float /* forceMin */,
+                          float /* forceMax */) {
     // float forceSmaller = force * 0.01745329;
-    cocos2d::CCPoint velocityCoords = cocos2d::CCPoint {
-        (float)player->m_platformerXVelocity,
-        (float)player->m_yVelocity
-    };
+    cocos2d::CCPoint velocityCoords = cocos2d::CCPoint{
+        (float)player->m_platformerXVelocity, (float)player->m_yVelocity};
 
     cocos2d::CCPoint p;
 
-    float idk = force * 0.017453292 - atan2f(velocityCoords.y, velocityCoords.x);
+    float idk =
+        force * 0.017453292 - atan2f(velocityCoords.y, velocityCoords.x);
     if (idk != 0.0) {
         float v11 = sin(idk);
         float v12 = cos(idk);
 
-        p = cocos2d::CCPoint {
+        p = cocos2d::CCPoint{
             (float)(velocityCoords.x * v11) - (float)(velocityCoords.y * v12),
-            (float)(velocityCoords.x * v12) + (float)(velocityCoords.y * v11)
-        };
+            (float)(velocityCoords.x * v12) + (float)(velocityCoords.y * v11)};
     }
 
     velocityCoords = p;
@@ -64,11 +63,9 @@ float /* forceMin */, float /* forceMax */) {
     return player->m_yVelocity;
 }
 
-
 // this function is a nightmare
 void teleportPlayer(GJBaseGameLayer* pl, TeleportPortalObject* object,
                     PlayerObject* player) {
-
     if (!player) {
         player = reinterpret_cast<PlayerObject*>(
             reinterpret_cast<uintptr_t>(pl->m_varianceValues.data()) + 0xe5);
@@ -168,12 +165,8 @@ void teleportPlayer(GJBaseGameLayer* pl, TeleportPortalObject* object,
 
     if (object->m_redirectForceEnabled) {
         phys::redirectPlayerForce(
-            player,
-            forceRelated,
-            object->m_redirectForceMod,
-            object->m_redirectForceMin,
-            object->m_redirectForceMax
-        );
+            player, forceRelated, object->m_redirectForceMod,
+            object->m_redirectForceMin, object->m_redirectForceMax);
     } else {
         if (object->m_staticForceEnabled) {
             float force = object->m_staticForce;

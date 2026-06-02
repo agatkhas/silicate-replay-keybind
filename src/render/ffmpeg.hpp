@@ -4,20 +4,21 @@
 #pragma once
 
 #include <Windows.h>
-#include <vector>
-#include <string>
+
 #include <Geode/Geode.hpp>
+#include <string>
+#include <vector>
 
 extern "C" {
-    #include <libavcodec/avcodec.h>
-    #include <libavformat/avformat.h>
-    #include <libavutil/opt.h>
-    #include <libavutil/imgutils.h>
-    #include <libswscale/swscale.h>
-    #include <libavfilter/avfilter.h>
-    #include <libavfilter/buffersrc.h>
-    #include <libavfilter/buffersink.h>
-    #include <libswresample/swresample.h>
+#include <libavcodec/avcodec.h>
+#include <libavfilter/avfilter.h>
+#include <libavfilter/buffersink.h>
+#include <libavfilter/buffersrc.h>
+#include <libavformat/avformat.h>
+#include <libavutil/imgutils.h>
+#include <libavutil/opt.h>
+#include <libswresample/swresample.h>
+#include <libswscale/swscale.h>
 }
 
 #define FFMPEG_FN(ident) decltype(ident)* ident;
@@ -87,12 +88,12 @@ static std::vector<std::string> DLL_FUNCTION_NAMES = {
     "avio_close",
     "swr_free",
     "avcodec_free_context",
-    "av_packet_free"
-};
+    "av_packet_free"};
 
-inline void* loadFunction(HMODULE* modules, size_t moduleSize, const char* name) {
+inline void* loadFunction(HMODULE* modules, size_t moduleSize,
+                          const char* name) {
     void* fn = 0;
-    
+
     size_t moduleIdx = 0;
     geode::log::info("[RENDERER] Resolving symbol {}...", name);
     while (fn == 0 && moduleIdx < moduleSize) {
@@ -114,24 +115,20 @@ static_assert(sizeof(ff_t) == sizeof(void*) * 31);
 inline bool loadFFmpegFunctions(void* ff) {
     std::vector<HMODULE> modules;
     std::vector<std::string> dlls = {
-        "avutil-60.dll",
-        "swresample-6.dll",
-        "swscale-9.dll",
-        "avcodec-62.dll",
-        "avformat-62.dll",
-        "avfilter-11.dll",
+        "avutil-60.dll",   "swresample-6.dll", "swscale-9.dll",
+        "avcodec-62.dll",  "avformat-62.dll",  "avfilter-11.dll",
         "avdevice-62.dll",
     };
 
     for (std::string& s : dlls) {
-        geode::log::info("[RENDERER] Loading library {}", 
-            geode::Mod::get()->getPersistentDir() / "libraries" / s
-        );
+        geode::log::info(
+            "[RENDERER] Loading library {}",
+            geode::Mod::get()->getPersistentDir() / "libraries" / s);
 
-        HMODULE mod = 
-            LoadLibraryW(
-                (geode::Mod::get()->getPersistentDir() / "libraries" / s).wstring().c_str()
-            );
+        HMODULE mod = LoadLibraryW(
+            (geode::Mod::get()->getPersistentDir() / "libraries" / s)
+                .wstring()
+                .c_str());
 
         if (mod == NULL) {
             DWORD errorCode = GetLastError();
@@ -142,8 +139,8 @@ inline bool loadFFmpegFunctions(void* ff) {
                 NULL, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                 (LPSTR)&messageBuffer, 0, NULL);
 
-            geode::log::error("[RENDERER] Failed to load {}: Error {} - {}", s, errorCode,
-                              messageBuffer);
+            geode::log::error("[RENDERER] Failed to load {}: Error {} - {}", s,
+                              errorCode, messageBuffer);
 
             LocalFree(messageBuffer);
         }
@@ -154,7 +151,8 @@ inline bool loadFFmpegFunctions(void* ff) {
     uintptr_t i = 0;
     geode::log::info("Loading {} functions...", DLL_FUNCTION_NAMES.size());
     for (std::string& s : DLL_FUNCTION_NAMES) {
-        void** loc = reinterpret_cast<void**>(reinterpret_cast<uintptr_t>(ff) + i);
+        void** loc =
+            reinterpret_cast<void**>(reinterpret_cast<uintptr_t>(ff) + i);
         *loc = loadFunction(modules.data(), modules.size(), s.c_str());
 
         if (*loc == 0) {

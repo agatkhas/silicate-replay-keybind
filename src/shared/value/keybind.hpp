@@ -46,8 +46,7 @@ class KeybindControl {
 
     virtual HashT getHash() = 0;
     const virtual std::string& getTag() = 0;
-    virtual void applyValue(bool pressed, void* value,
-                                  void* previous) = 0;
+    virtual void applyValue(bool pressed, void* value, void* previous) = 0;
     virtual void fromString(const std::string& str) = 0;
     const virtual std::string toString() = 0;
 
@@ -88,7 +87,8 @@ class SLKeybind : public KeybindControl {
     T m_value;
 
    public:
-    SLKeybind(int key, int modifiers, KeybindType type, T value, std::string tag)
+    SLKeybind(int key, int modifiers, KeybindType type, T value,
+              std::string tag)
         : m_value(value) {
         m_key = key;
         m_modifiers = modifiers;
@@ -97,18 +97,18 @@ class SLKeybind : public KeybindControl {
     }
 
     static std::shared_ptr<SLKeybind<T>> create(std::string tag, int key,
-                                              KeybindType type, T value,
-                                              int modifiers = 0) {
+                                                KeybindType type, T value,
+                                                int modifiers = 0) {
         return std::make_shared<SLKeybind<T>>(key, modifiers, type, value, tag);
     }
 
     static std::shared_ptr<SLKeybind<T>> createFromString(std::string tag,
-                                                        int key,
-                                                        KeybindType type,
-                                                        std::string value,
-                                                        int modifiers = 0) {
+                                                          int key,
+                                                          KeybindType type,
+                                                          std::string value,
+                                                          int modifiers = 0) {
         return std::make_shared<SLKeybind<T>>(key, modifiers, type,
-                                            Self::readFromString(value), tag);
+                                              Self::readFromString(value), tag);
     }
 
     HashT getHash() override { return m_key | (m_modifiers << 20); }

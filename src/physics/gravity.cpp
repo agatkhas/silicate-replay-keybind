@@ -1,5 +1,7 @@
-#include <Geode/Geode.hpp>
 #include "gravity.hpp"
+
+#include <Geode/Geode.hpp>
+
 #include "bot/bot.hpp"
 #include "replay/system.hpp"
 #include "trajectory/trajectory.hpp"
@@ -52,22 +54,16 @@ void flipGravity(PlayerObject* player, bool gravity) {
     auto& gameState = GJBaseGameLayer::get()->m_gameState;
 
     flipGravityInner(player, gravity);
-    if (
-        Bot::get()->trajectory().isFakePlayer(player)
-        && !gameState.m_unkBool31
-        && gameState.m_isDualMode
-        && !GJBaseGameLayer::get()->m_levelSettings->m_twoPlayerMode
-    ) {
+    if (Bot::get()->trajectory().isFakePlayer(player) &&
+        !gameState.m_unkBool31 && gameState.m_isDualMode &&
+        !GJBaseGameLayer::get()->m_levelSettings->m_twoPlayerMode) {
         auto p1 = player;
         auto p2 = Bot::get()->trajectory().getOtherPlayer(player);
-        if (!(
-            p1->m_isShip == p2->m_isShip &&
-            p1->m_isBall == p2->m_isBall &&
-            p1->m_isBird == p2->m_isBird &&
-            p1->m_isSpider == p2->m_isSpider &&
-            p1->m_isRobot == p2->m_isRobot &&
-            p1->m_isSwing == p2->m_isSwing
-        )) {
+        if (!(p1->m_isShip == p2->m_isShip && p1->m_isBall == p2->m_isBall &&
+              p1->m_isBird == p2->m_isBird &&
+              p1->m_isSpider == p2->m_isSpider &&
+              p1->m_isRobot == p2->m_isRobot &&
+              p1->m_isSwing == p2->m_isSwing)) {
             return;
         }
 
@@ -75,8 +71,7 @@ void flipGravity(PlayerObject* player, bool gravity) {
     }
 }
 
-void propellPlayer(PlayerObject* player, float force, bool,
-                   int) {
+void propellPlayer(PlayerObject* player, float force, bool, int) {
     player->m_maybeIsBoosted = true;
     player->m_isOnGround2 = false;
     player->m_isOnGround = false;

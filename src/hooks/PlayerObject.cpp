@@ -111,7 +111,7 @@ struct SLPlayerObject : Modify<SLPlayerObject, PlayerObject> {
     }
 
     void removePendingCheckpoint() {
-        return; // don't, we don't use pending checkpoints anywhere
+        return;  // don't, we don't use pending checkpoints anywhere
     }
 
     void tryPlaceCheckpoint() {
@@ -120,7 +120,8 @@ struct SLPlayerObject : Modify<SLPlayerObject, PlayerObject> {
         }
 
         const double checkpointTimeout = this->m_quickCheckpointMode ? 0.2 : 1;
-        if ((this->m_gameLayer->m_gameState.m_totalTime - this->m_lastCheckpointTime) > checkpointTimeout) {
+        if ((this->m_gameLayer->m_gameState.m_totalTime -
+             this->m_lastCheckpointTime) > checkpointTimeout) {
             this->m_gameLayer->m_uiLayer->onCheck(nullptr);
             this->m_shouldTryPlacingCheckpoint = false;
             this->m_lastCheckpointTime = this->m_totalTime;
@@ -134,10 +135,8 @@ struct SLPlayerObject : Modify<SLPlayerObject, PlayerObject> {
 
         auto bot = Bot::get();
         auto gjbgl = GJBaseGameLayer::get();
-        if ((this == gjbgl->m_player2 && !gjbgl->m_gameState.m_isDualMode)
-            || bot->updater().m_canDie->inner()
-            || bot->isPlaying()
-        ) {
+        if ((this == gjbgl->m_player2 && !gjbgl->m_gameState.m_isDualMode) ||
+            bot->updater().m_canDie->inner() || bot->isPlaying()) {
             PlayerObject::releaseAllButtons();
         }
     }

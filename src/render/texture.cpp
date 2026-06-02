@@ -17,24 +17,18 @@
 
 using namespace cocos2d;
 
-static void silentChangeSize(CCSize size, float /* wOffset */, float /* hOffset */) {
+static void silentChangeSize(CCSize size, float /* wOffset */,
+                             float /* hOffset */) {
     auto director = CCDirector::sharedDirector();
     auto view = CCEGLView::sharedOpenGLView();
     view->CCEGLViewProtocol::setFrameSize(size.width, size.height);
     director->updateScreenScale(size);
     director->setViewport();
     director->setProjection(kCCDirectorProjection2D);
-    glViewport(
-        0,
-        0,
-        size.width,
-        size.height
-    );
+    glViewport(0, 0, size.width, size.height);
 }
 
-void RenderTexture::init(
-    std::unique_ptr<Colorspace> colorspace
-) {
+void RenderTexture::init(std::unique_ptr<Colorspace> colorspace) {
 #ifdef SILICATE_PROTECT
     VMProtectBegin("RenderTexture::init");
 #endif
@@ -110,7 +104,8 @@ void RenderTexture::capture(uint8_t** data, std::atomic<bool>& hasDataFlag) {
 
         if (i == 0) {
             // actually render the scene
-            silentChangeSize(cocos2d::CCSize(pass.m_width, pass.m_height), m_widthOffset, m_heightOffset);
+            silentChangeSize(cocos2d::CCSize(pass.m_width, pass.m_height),
+                             m_widthOffset, m_heightOffset);
 
             CCDirector::get()->m_pRunningScene->visit();
         } else {
@@ -179,8 +174,9 @@ void RenderTexture::displayPreview() {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, m_passes[0].m_fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_old_fbo);
 
-    glBlitFramebuffer(m_widthOffset, m_heightOffset, m_alignedWidth, m_alignedHeight, 0, 0, size.width,
-                      size.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(m_widthOffset, m_heightOffset, m_alignedWidth,
+                      m_alignedHeight, 0, 0, size.width, size.height,
+                      GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
     if (blend) {
         glEnable(GL_BLEND);

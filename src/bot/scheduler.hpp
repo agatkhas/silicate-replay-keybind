@@ -24,7 +24,8 @@ class BotScheduler {
     std::unordered_map<JobId, ScheduledJob> m_jobs;
 
    public:
-    JobId schedule(const JobExecutor &executor, double interval, bool repeat = false);
+    JobId schedule(const JobExecutor& executor, double interval,
+                   bool repeat = false);
     void unschedule(JobId id);
     void reschedule(JobId id, double interval);
 

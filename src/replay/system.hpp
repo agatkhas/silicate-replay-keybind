@@ -20,7 +20,7 @@ class ReplaySystem {
     void processSlc2(slc::v2::Replay<ReplayMeta>& replay);
 
    public:
-   size_t m_inputIndex;
+    size_t m_inputIndex;
 
     slc::ActionAtom m_actionAtom;
     bool m_collectInputs = true;

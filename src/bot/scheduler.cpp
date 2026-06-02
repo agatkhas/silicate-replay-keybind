@@ -10,17 +10,17 @@ void ScheduledJob::update(const float dt) {
     m_stale = !m_repeat;
 }
 
-
 BotScheduler::JobId BotScheduler::schedule(const JobExecutor& executor,
                                            const double interval,
                                            const bool repeat) {
     m_nextFreeId++;
 
-    m_jobs.insert({m_nextFreeId, {
-        .m_interval = interval,
-        .m_repeat = repeat,
-        .m_executor = executor,
-    }});
+    m_jobs.insert({m_nextFreeId,
+                   {
+                       .m_interval = interval,
+                       .m_repeat = repeat,
+                       .m_executor = executor,
+                   }});
 
     return m_nextFreeId;
 }

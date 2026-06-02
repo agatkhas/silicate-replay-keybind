@@ -3,12 +3,12 @@
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 
-#include "state.hpp"
-#include "theme.hpp"
 #include <tabby.hpp>
 
-class UIManager {
+#include "state.hpp"
+#include "theme.hpp"
 
+class UIManager {
    public:
     UIState m_state;
 

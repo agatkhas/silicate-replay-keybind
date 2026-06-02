@@ -1,6 +1,6 @@
 // #include "imgui.h"
-#include <string>
 #include <functional>
+#include <string>
 
 class SLUITab {
     std::string m_name;
@@ -13,7 +13,5 @@ class SLUITab {
         return *this;
     }
 
-    void draw() {
-        m_bodyFn();
-    }
+    void draw() { m_bodyFn(); }
 };

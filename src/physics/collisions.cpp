@@ -81,9 +81,9 @@ int checkPlayerCollisions(GJBaseGameLayer* gameLayer, PlayerObject* player) {
 
     if (angleTransformed <= player->getPosition().y ||
         (groundExists &&
-            (player->m_isShip || player->m_isBird || player->m_isDart ||
-             player->m_isSwing || player->m_isBall || player->m_isSpider ||
-             gameLayer->m_gameState.m_isDualMode))) {
+         (player->m_isShip || player->m_isBird || player->m_isDart ||
+          player->m_isSwing || player->m_isBall || player->m_isSpider ||
+          gameLayer->m_gameState.m_isDualMode))) {
         if (player->getPosition().y >
             (float)(someValue + gameLayer->m_maxGameplayY)) {
             exceededBounds = true;
@@ -111,8 +111,8 @@ int checkPlayerCollisions(GJBaseGameLayer* gameLayer, PlayerObject* player) {
     return 0;
 }
 
-int collidedWithObjectInternal(PlayerObject* player, float,
-                               GameObject* object, CCRect* p4, bool) {
+int collidedWithObjectInternal(PlayerObject* player, float, GameObject* object,
+                               CCRect* p4, bool) {
     [[maybe_unused]] bool holdingLeft = player->m_holdingLeft;
     [[maybe_unused]] bool holdingRight = player->m_holdingLeft;
     if (player->m_leftPressedFirst) {
@@ -473,7 +473,8 @@ void collisionCheckObjects(GJBaseGameLayer* pl, PlayerObject* player,
                     cocos2d::CCRect emptyRect =
                         cocos2d::CCRect{0.0, 0.0, 0.0, 0.0};
 
-                    player->handleRotatedCollisionInternal(dt, object, emptyRect, false, false, true);
+                    player->handleRotatedCollisionInternal(
+                        dt, object, emptyRect, false, false, true);
                 }
 
                 playerMinX = player->getObjectRect().getMinX();
@@ -691,7 +692,8 @@ void checkSpawnObjects(GJBaseGameLayer* pl, PlayerObject* player) {
     bool goingBack = pl->m_gameState.m_spawnChannelRelated1.at(
         pl->m_gameState.m_currentChannel);
 
-    for (int i = startingIndex; static_cast<unsigned int>(i) < objects->count(); i++) {
+    for (int i = startingIndex; static_cast<unsigned int>(i) < objects->count();
+         i++) {
         SpawnTriggerGameObject* object =
             (SpawnTriggerGameObject*)objects->objectAtIndex(i);
         if (object->m_objectID != 2066 && object->m_objectID != 2900 &&

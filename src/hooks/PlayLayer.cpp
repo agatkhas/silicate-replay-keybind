@@ -318,10 +318,10 @@ struct SLPlayLayer : Modify<SLPlayLayer, PlayLayer> {
 
             p1Holding |= p2Holding && !m_levelSettings->m_twoPlayerMode;
 
-#define BUTTON_CHECK(varName, button, player)                               \
-    if (p##player##varName !=                                               \
-        this->m_player##player->m_holdingButtons[button]) {                 \
-        this->queueButton(button, p##player##varName,                       \
+#define BUTTON_CHECK(varName, button, player)                                  \
+    if (p##player##varName !=                                                  \
+        this->m_player##player->m_holdingButtons[button]) {                    \
+        this->queueButton(button, p##player##varName,                          \
                           rs.playerFlipped(static_cast<bool>(player - 1)), 0); \
     }
 
@@ -579,7 +579,8 @@ struct SLPlayLayer : Modify<SLPlayLayer, PlayLayer> {
         return true;
     }
 
-    void conditionalDestroyPlayer(PlayerObject* player, GameObject* gameObject) {
+    void conditionalDestroyPlayer(PlayerObject* player,
+                                  GameObject* gameObject) {
         if (gameObject == m_anticheatSpike) {
             return PlayLayer::destroyPlayer(player, gameObject);
         }
@@ -587,8 +588,10 @@ struct SLPlayLayer : Modify<SLPlayLayer, PlayLayer> {
         auto bot = Bot::get();
 
         using N = BotUpdater::NoclipType;
-        bool shouldDie = (bot->updater().m_noclipType == N::Player1 && (player == m_player2)) ||
-            (bot->updater().m_noclipType == N::Player2 && (player == m_player1));
+        bool shouldDie = (bot->updater().m_noclipType == N::Player1 &&
+                          (player == m_player2)) ||
+                         (bot->updater().m_noclipType == N::Player2 &&
+                          (player == m_player1));
 
         if (!bot->updater().m_noclip->inner() || shouldDie) {
             return PlayLayer::destroyPlayer(player, gameObject);
@@ -609,9 +612,11 @@ struct SLPlayLayer : Modify<SLPlayLayer, PlayLayer> {
 
                 if (bot->updater().m_autoFlipOnDeath->inner()) {
                     if (player == m_player1) {
-                        this->queueButton(1, !player->m_jumpBuffered, false, 0.0);
+                        this->queueButton(1, !player->m_jumpBuffered, false,
+                                          0.0);
                     } else {
-                        this->queueButton(1, !player->m_jumpBuffered, true, 0.0);
+                        this->queueButton(1, !player->m_jumpBuffered, true,
+                                          0.0);
                     }
 
                     // bot->updater().stepOnce();
@@ -639,9 +644,11 @@ struct SLPlayLayer : Modify<SLPlayLayer, PlayLayer> {
 
         PlayLayer::updateVisibility(dt);
         if (updater.m_layoutMode->inner()) {
-            constexpr std::array<int, 5> colors = {1000, 1001, 1009, 1013, 1014};
+            constexpr std::array<int, 5> colors = {1000, 1001, 1009, 1013,
+                                                   1014};
             for (const int color : colors) {
-                if (ColorAction* action = m_effectManager->getColorAction(color)) {
+                if (ColorAction* action =
+                        m_effectManager->getColorAction(color)) {
                     switch (color) {
                         case 1000: {
                             auto& col = SLSettings::get()->layoutBgColor;
@@ -652,7 +659,8 @@ struct SLPlayLayer : Modify<SLPlayLayer, PlayLayer> {
                             };
                             break;
                         }
-                        case 1001: case 1009: {
+                        case 1001:
+                        case 1009: {
                             auto& col = SLSettings::get()->layoutGroundColor;
                             action->m_color = {
                                 static_cast<GLubyte>(col[0] * 255),
@@ -701,13 +709,16 @@ struct SLPlayLayer : Modify<SLPlayLayer, PlayLayer> {
     }
 
     void addObject(GameObject* obj) {
-        if (!Bot::get()->isEnabled() || !Bot::get()->updater().m_layoutMode->inner()) {
+        if (!Bot::get()->isEnabled() ||
+            !Bot::get()->updater().m_layoutMode->inner()) {
             return PlayLayer::addObject(obj);
         }
 
-        static const std::unordered_set<int> OTHER_OBJECT_IDS = {32, 33, 1006, 1007, 29, 30, 104, 105, 221, 717, 718, 743,
-            744, 899, 915, 2903, 2904, 2905, 2907, 2909, 2910, 2911, 2912, 2913, 2914, 2915, 2916, 2917,
-            2919, 2920, 2921, 2922, 2923, 2924, 3029, 3030, 3031, 3606, 3612 };
+        static const std::unordered_set<int> OTHER_OBJECT_IDS = {
+            32,   33,   1006, 1007, 29,   30,   104,  105,  221,  717,
+            718,  743,  744,  899,  915,  2903, 2904, 2905, 2907, 2909,
+            2910, 2911, 2912, 2913, 2914, 2915, 2916, 2917, 2919, 2920,
+            2921, 2922, 2923, 2924, 3029, 3030, 3031, 3606, 3612};
 
         if (OTHER_OBJECT_IDS.contains(obj->m_objectID)) {
             obj->m_isHide = true;
@@ -724,7 +735,6 @@ struct SLPlayLayer : Modify<SLPlayLayer, PlayLayer> {
             obj->m_isDontEnter = true;
         }
 
-
         PlayLayer::addObject(obj);
     }
 };
@@ -734,8 +744,8 @@ constexpr int QUEUE_CHECKPOINT_OFFSET = 0x4ce060;
 // this basically removes the one frame delay with placing checkpoints
 void PlayLayer_queueCheckpoint(void* unk, void* unk2) {
     if (!Bot::get()->isEnabled()) {
-        return reinterpret_cast<void (*)(void*, void*)>(geode::base::get() +
-                                                 QUEUE_CHECKPOINT_OFFSET)(unk, unk2);
+        return reinterpret_cast<void (*)(void*, void*)>(
+            geode::base::get() + QUEUE_CHECKPOINT_OFFSET)(unk, unk2);
     }
 
     auto pl = PlayLayer::get();
@@ -761,7 +771,8 @@ static void resetLevelSeedMidhook(SafetyHookContext&) {
         return;  // don't modify rng
     }
 
-    Bot::get()->replaySystem().getCurrentRandomState() = Bot::get()->replaySystem().m_startingSeedThisAttempt;
+    Bot::get()->replaySystem().getCurrentRandomState() =
+        Bot::get()->replaySystem().m_startingSeedThisAttempt;
     Bot::get()->replaySystem().m_shakeRandomState =
         Bot::get()->replaySystem().m_startingSeedThisAttempt & 0x7FFF;
     // queueInMainThread([]() {
@@ -770,7 +781,8 @@ static void resetLevelSeedMidhook(SafetyHookContext&) {
 }
 
 $execute {
-    util::midhook(geode::base::get() + 0x3b90fb, "resetLevelSeed", resetLevelSeedMidhook);
+    util::midhook(geode::base::get() + 0x3b90fb, "resetLevelSeed",
+                  resetLevelSeedMidhook);
 
     Bot::get()->updater().m_tps->handle([](double& tps) {
         if (tps <= 0.0) {

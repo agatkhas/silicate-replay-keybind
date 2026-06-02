@@ -31,13 +31,18 @@ LabelManager::LabelManager() {
              },
              {});
 
-    addLabel("internal_frame", "Internal Physics Tick", []() {
-        return fmt::format("Internal Tick: {}", PlayLayer::get()->m_gameState.m_currentProgress);
-    }, {});
+    addLabel("internal_frame", "Internal Physics Tick",
+             []() {
+                 return fmt::format(
+                     "Internal Tick: {}",
+                     PlayLayer::get()->m_gameState.m_currentProgress);
+             },
+             {});
 
-    addLabel("tps", "TPS", []() {
-        return fmt::format("TPS: {}", Bot::get()->updater().getTps());
-    }, {});
+    addLabel(
+        "tps", "TPS",
+        []() { return fmt::format("TPS: {}", Bot::get()->updater().getTps()); },
+        {});
 
     addLabel("player_x", "Player X",
              []() { GET_PLAYER_VAR("X", position.x, 6) }, {});
@@ -141,6 +146,20 @@ LabelManager::LabelManager() {
                              BotUpdater::LockDeltaMode::Accuracy
                          ? tfx - Bot::get()->updater().m_lastTfp
                          : Bot::get()->updater().getPhysicsDt());
+             },
+             {});
+
+    addLabel("max_upr", "Dynamic UPR",
+             []() {
+                 if (Bot::get()->updater().m_realTime->inner()) {
+                     return std::string("Dynamic UPR: Uncapped");
+                 }
+
+                 if (Bot::get()->updater().m_dynamicUpr->inner()) {
+                     return fmt::format("Dynamic UPR: {}", Bot::get()->updater().m_stepLimit);
+                 } else {
+                     return fmt::format("Static UPR: {}", Bot::get()->updater().m_stepLimit);
+                 }
              },
              {});
 }

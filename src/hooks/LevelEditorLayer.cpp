@@ -3,11 +3,11 @@
 #include <Geode/Geode.hpp>
 
 #include "assist/autoclicker.hpp"
+#include "assist/hitboxes.hpp"
 #include "bot/bot.hpp"
 #include "bot/updater.hpp"
 #include "replay/system.hpp"
 #include "trajectory/trajectory.hpp"
-#include "assist/hitboxes.hpp"
 
 using namespace geode::prelude;
 
@@ -58,7 +58,7 @@ struct SLLevelEditorLayer : Modify<SLLevelEditorLayer, LevelEditorLayer> {
         auto& t = Bot::get()->trajectory();
 
         if (t.exists()) {
-          t.uninit();
+            t.uninit();
         }
 
         t.init();
@@ -91,7 +91,5 @@ struct SLLevelEditorLayer : Modify<SLLevelEditorLayer, LevelEditorLayer> {
         Bot::get()->trajectory().update(this);
     }
 
-    void updateEditor(float dt) {
-        LevelEditorLayer::updateEditor(dt);
-    }
+    void updateEditor(float dt) { LevelEditorLayer::updateEditor(dt); }
 };

@@ -39,17 +39,16 @@ struct SLPauseLayer : Modify<SLPauseLayer, PauseLayer> {
         CCSprite* sprite = CCSprite::create("silicate-button.png"_spr);
         sprite->setScale(0.35f);
 
-        CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(sprite, this, menu_selector(SLPauseLayer::onSilicateOpen));
+        CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(
+            sprite, this, menu_selector(SLPauseLayer::onSilicateOpen));
 
         CCNode* menu = this->getChildByID("right-button-menu");
         menu->addChild(btn);
         menu->updateLayout();
     }
 
-public:
-    void onSilicateOpen(CCObject*) {
-        Bot::get()->ui().toggle();
-    }
+   public:
+    void onSilicateOpen(CCObject*) { Bot::get()->ui().toggle(); }
 };
 
 static void releaseButtonsMidhook(SafetyHookContext& ctx) {
@@ -60,8 +59,11 @@ static void releaseButtonsMidhook(SafetyHookContext& ctx) {
 
 $execute {
     // In PlayLayer::pauseGame
-    util::midhook(geode::base::get() + 0x3BA239, "pauseReleaseButtons", releaseButtonsMidhook);
-    util::midhook(geode::base::get() + 0x3BA27C, "pauseReleaseButtons", releaseButtonsMidhook);
+    util::midhook(geode::base::get() + 0x3BA239, "pauseReleaseButtons",
+                  releaseButtonsMidhook);
+    util::midhook(geode::base::get() + 0x3BA27C, "pauseReleaseButtons",
+                  releaseButtonsMidhook);
     // In PlayLayer::resume
-    util::midhook(geode::base::get() + 0x3BA879, "resumeReleaseButtons", releaseButtonsMidhook);
+    util::midhook(geode::base::get() + 0x3BA879, "resumeReleaseButtons",
+                  releaseButtonsMidhook);
 }

@@ -6,6 +6,7 @@
 
 #include <Geode/Geode.hpp>
 #include <algorithm>
+
 #include "checkpoint/checkpoint.hpp"
 
 using namespace geode::prelude;

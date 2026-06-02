@@ -58,13 +58,13 @@ struct Replay {
     static constexpr size_t BUFFER_SIZE = 8192;
 
     [[nodiscard]] static std::expected<Replay, Error> fromFile(
-        const std::filesystem::path &path);
+        const std::filesystem::path& path);
 
     std::expected<std::vector<uint8_t>, Error> toBytes();
-    std::expected<void, Error> toFile(const std::filesystem::path &path);
+    std::expected<void, Error> toFile(const std::filesystem::path& path);
 
     inline void addInput(const Input input) { m_inputs.emplace_back(input); }
-    inline void addInput(const Input &&input) { m_inputs.emplace_back(input); }
+    inline void addInput(const Input&& input) { m_inputs.emplace_back(input); }
 };
 
 #endif  // REPLAY_REPLAY_HPP

@@ -9,8 +9,8 @@
 
 using namespace geode::prelude;
 
-#include <Geode/modify/VideoOptionsLayer.hpp>
 #include <Geode/modify/ForceBlockGameObject.hpp>
+#include <Geode/modify/VideoOptionsLayer.hpp>
 
 struct SLVideoOptionsLayer : Modify<SLVideoOptionsLayer, VideoOptionsLayer> {
     void onApply(cocos2d::CCObject* sender) {

@@ -68,16 +68,15 @@ void ReplaySystem::save(std::filesystem::path path, bool noOverwrite) {
     }
 
     Replay replay;
-    std::stable_sort(m_actionAtom.m_actions.begin(), m_actionAtom.m_actions.end(),
-                      [](const auto& a, const auto& b) {
-                          return a.m_frame < b.m_frame;
-                      });
+    std::stable_sort(
+        m_actionAtom.m_actions.begin(), m_actionAtom.m_actions.end(),
+        [](const auto& a, const auto& b) { return a.m_frame < b.m_frame; });
 
     uint64_t previousFrame = 0;
     for (auto& action : m_actionAtom.m_actions) {
-      // recalculate delta for all actions
-      action.recalculateDelta(previousFrame);
-      previousFrame = action.m_frame;
+        // recalculate delta for all actions
+        action.recalculateDelta(previousFrame);
+        previousFrame = action.m_frame;
     }
 
     replay.m_atoms.add(m_actionAtom);
@@ -89,7 +88,8 @@ void ReplaySystem::save(std::filesystem::path path, bool noOverwrite) {
     std::ofstream fd(path, std::ios::binary);
     auto result = replay.write(fd);
     if (!result.has_value()) {
-        geode::log::error("Failed to save replay: {}", result.error().m_message);
+        geode::log::error("Failed to save replay: {}",
+                          result.error().m_message);
         return;
     }
 
@@ -98,16 +98,10 @@ void ReplaySystem::save(std::filesystem::path path, bool noOverwrite) {
 
 void ReplaySystem::processSlc3(Replay& replay) {
     auto& atoms = replay.m_atoms.m_atoms;
-    auto it = std::find_if(
-        atoms.begin(),
-        atoms.end(), [](auto& v) {
-            return std::visit(
-                [](auto& at) {
-                    return at.id ==
-                    slc::v3::AtomId::Action;
-                },
-                v);
-        });
+    auto it = std::find_if(atoms.begin(), atoms.end(), [](auto& v) {
+        return std::visit(
+            [](auto& at) { return at.id == slc::v3::AtomId::Action; }, v);
+    });
 
     auto atom = *it;
     auto& updater = Bot::get()->updater();
@@ -122,60 +116,48 @@ void ReplaySystem::processSlc2(slc::v2::Replay<ReplayMeta>& replay) {
     uint64_t currentFrame = 0;
     auto& a = m_actionAtom;
     a.clear();
-    for (const auto& input :
-        replay.getInputs()) {
-            if (input.m_button ==
-                slc::v2::Input::InputType::Skip) {
-                    currentFrame = input.m_frame;
-                    continue;
-                }
-
-            if (static_cast<int>(input.m_button) <
-                static_cast<int>(
-                    slc::v2::Input::InputType::
-                    Restart)) {
-                        a.m_actions.push_back(slc::v3::Action(
-                            currentFrame,
-                            input.m_frame - currentFrame,
-                            static_cast<
-                            slc::Action::ActionType>(
-                                input.m_button),
-                            input.m_holding, input.m_player2));
-                        currentFrame = input.m_frame;
-                        continue;
-                    }
-
-            if (static_cast<int>(input.m_button) <
-                static_cast<int>(
-                    slc::v2::Input::InputType::TPS)) {
-                        a.m_actions.push_back(slc::v3::Action(
-                            currentFrame,
-                            input.m_frame - currentFrame,
-                            static_cast<
-                            slc::v3::Action::ActionType>(
-                                input.m_button),
-                            replay.m_meta.seed));
-                        currentFrame = input.m_frame;
-                        continue;
-                    }
-
-            a.m_actions.push_back(slc::v3::Action(
-                currentFrame,
-                input.m_frame - currentFrame,
-                input.m_tps));
+    for (const auto& input : replay.getInputs()) {
+        if (input.m_button == slc::v2::Input::InputType::Skip) {
             currentFrame = input.m_frame;
+            continue;
         }
 
-        auto& updater = Bot::get()->updater();
-        m_startingSeed = replay.m_meta.seed;
-        updater.m_tps->inner() = replay.m_tps;
-        updater.m_tps->notifyChange();
-        Bot::get()->setMode(Bot::Mode::Playing);
+        if (static_cast<int>(input.m_button) <
+            static_cast<int>(slc::v2::Input::InputType::Restart)) {
+            a.m_actions.push_back(slc::v3::Action(
+                currentFrame, input.m_frame - currentFrame,
+                static_cast<slc::Action::ActionType>(input.m_button),
+                input.m_holding, input.m_player2));
+            currentFrame = input.m_frame;
+            continue;
+        }
+
+        if (static_cast<int>(input.m_button) <
+            static_cast<int>(slc::v2::Input::InputType::TPS)) {
+            a.m_actions.push_back(slc::v3::Action(
+                currentFrame, input.m_frame - currentFrame,
+                static_cast<slc::v3::Action::ActionType>(input.m_button),
+                replay.m_meta.seed));
+            currentFrame = input.m_frame;
+            continue;
+        }
+
+        a.m_actions.push_back(slc::v3::Action(
+            currentFrame, input.m_frame - currentFrame, input.m_tps));
+        currentFrame = input.m_frame;
+    }
+
+    auto& updater = Bot::get()->updater();
+    m_startingSeed = replay.m_meta.seed;
+    updater.m_tps->inner() = replay.m_tps;
+    updater.m_tps->notifyChange();
+    Bot::get()->setMode(Bot::Mode::Playing);
 }
 
 void ReplaySystem::load(std::filesystem::path path) {
     if (!std::filesystem::exists(path)) {
-        geode::log::error("Failed to load slc3 replay from {}; file does not exist", path);
+        geode::log::error(
+            "Failed to load slc3 replay from {}; file does not exist", path);
         return;
     }
 
@@ -198,16 +180,19 @@ void ReplaySystem::load(std::filesystem::path path) {
 }
 
 std::filesystem::path ReplaySystem::getCurrentPath() {
-    return Mod::get()->getPersistentDir(true) / "replays" / (m_replayName + ".slc");
+    return Mod::get()->getPersistentDir(true) / "replays" /
+           (m_replayName + ".slc");
 }
 
 static std::filesystem::path createBackupPath(const std::string& name) {
     namespace time = std::chrono;
 
-    const time::time_point timestamp = time::floor<time::milliseconds>(time::system_clock::now());
+    const time::time_point timestamp =
+        time::floor<time::milliseconds>(time::system_clock::now());
 
-    const std::filesystem::path path = Mod::get()->getPersistentDir(true)
-        / "backups" / fmt::format("_backup_{:%Y%m%d_%H%M%S}_{}.slc", timestamp, name);
+    const std::filesystem::path path =
+        Mod::get()->getPersistentDir(true) / "backups" /
+        fmt::format("_backup_{:%Y%m%d_%H%M%S}_{}.slc", timestamp, name);
 
     return path;
 }
@@ -219,7 +204,8 @@ void ReplaySystem::backupExisting(std::filesystem::path path) {
 
     std::string name = path.stem().string();
     auto newPath = createBackupPath(name);
-    std::filesystem::copy(path, newPath, std::filesystem::copy_options::skip_existing);
+    std::filesystem::copy(path, newPath,
+                          std::filesystem::copy_options::skip_existing);
 }
 
 void ReplaySystem::createBackup() {
@@ -231,13 +217,17 @@ $execute {
     auto bot = Bot::get();
     auto& rs = bot->replaySystem();
 
-    rs.m_autosaveId = bot->scheduler().schedule([&rs]() {
-        auto pl = PlayLayer::get();
-        if (!pl) return;
-        if (!rs.m_autosaveAtInterval->inner()) return;
+    rs.m_autosaveId = bot->scheduler().schedule(
+        [&rs]() {
+            auto pl = PlayLayer::get();
+            if (!pl) return;
+            if (!rs.m_autosaveAtInterval->inner()) return;
 
-        if (Bot::get()->isRecording()) { rs.createBackup(); }
-    }, rs.m_autosaveInterval->inner(), true);
+            if (Bot::get()->isRecording()) {
+                rs.createBackup();
+            }
+        },
+        rs.m_autosaveInterval->inner(), true);
 
     rs.m_autosaveInterval->handle([bot, &rs](double& interval) {
         bot->scheduler().reschedule(rs.m_autosaveId, interval);

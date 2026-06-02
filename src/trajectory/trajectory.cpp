@@ -31,7 +31,8 @@ cocos2d::ccColor4F toCocosColorNegative(float colors[4]) {
                               1.0f - colors[2], colors[3]};
 }
 
-static cocos2d::CCRect usingWidth(const cocos2d::CCRect& old, const float width) {
+static cocos2d::CCRect usingWidth(const cocos2d::CCRect& old,
+                                  const float width) {
     cocos2d::CCRect rect = old;
     rect.origin.x += width;
     rect.origin.y += width;
@@ -46,13 +47,14 @@ int Trajectory::getPredictionLength() {
     if (!pl) return 0;
 
     return m_state->m_length->inner() *
-                                std::max(bot->updater().getTps(), 240.0) /
-                                pl->m_gameState.m_timeWarp;
+           std::max(bot->updater().getTps(), 240.0) /
+           pl->m_gameState.m_timeWarp;
 }
 
 bool Trajectory::iterate(GJBaseGameLayer* pl, PlayerObject* player, int mode,
                          float* colors, bool&,
-                         std::vector<TrajectoryPlayerData>& cached, PredictionConfig config) {
+                         std::vector<TrajectoryPlayerData>& cached,
+                         PredictionConfig config) {
     cocos2d::CCPoint position = player->getPosition();
 
     pl->m_gameState.m_totalTime += Bot::get()->updater().getPhysicsDt();
@@ -94,7 +96,8 @@ bool Trajectory::iterate(GJBaseGameLayer* pl, PlayerObject* player, int mode,
 
     for (auto& action : m_actions) {
         if (action.m_delay == 0) {
-            // geode::log::info("executing action at pseudo-frame {}", pl->m_gameState.m_currentProgress - 1);
+            // geode::log::info("executing action at pseudo-frame {}",
+            // pl->m_gameState.m_currentProgress - 1);
             action.m_func();
             action.m_executed = true;
             continue;
@@ -105,7 +108,9 @@ bool Trajectory::iterate(GJBaseGameLayer* pl, PlayerObject* player, int mode,
 
     std::erase_if(m_actions, [](auto& a) { return a.m_executed; });
 
-    float delta = config.m_overridenTPS == 0.0 ? m_delta : (1.0 / config.m_overridenTPS) * 60.0;
+    float delta = config.m_overridenTPS == 0.0
+                      ? m_delta
+                      : (1.0 / config.m_overridenTPS) * 60.0;
     // float delta = m_delta;
 
     player->m_playEffects = false;
@@ -143,9 +148,9 @@ bool Trajectory::iterate(GJBaseGameLayer* pl, PlayerObject* player, int mode,
     return false;  // continue iteration
 }
 
-TrajectoryPlayerData Trajectory::runPrediction(GJBaseGameLayer* pl, PlayerObject* player,
-                               PlayerObject* other, int mode, float* colors,
-                               bool both, CacheMap& cached, PredictionConfig config) {
+TrajectoryPlayerData Trajectory::runPrediction(
+    GJBaseGameLayer* pl, PlayerObject* player, PlayerObject* other, int mode,
+    float* colors, bool both, CacheMap& cached, PredictionConfig config) {
     auto bot = Bot::get();
     bool hasPerformedClick = false;
     bool hasPerformedClickOther = false;
@@ -213,10 +218,10 @@ TrajectoryPlayerData Trajectory::runPrediction(GJBaseGameLayer* pl, PlayerObject
         }
 
         float width = m_state->m_width->inner() / pl->m_gameState.m_cameraZoom;
-        m_node->drawSegment(
-            position, plr->getPosition(), width,
-            plr == m_fakePlayer1 ? toCocosColor(colors)
-                                 : toCocosColorNegative(colors));
+        m_node->drawSegment(position, plr->getPosition(), width,
+                            plr == m_fakePlayer1
+                                ? toCocosColor(colors)
+                                : toCocosColorNegative(colors));
     }
 
     bool breakIterationP1 = false;
@@ -227,7 +232,8 @@ TrajectoryPlayerData Trajectory::runPrediction(GJBaseGameLayer* pl, PlayerObject
         Bot::get()->replaySystem().m_actionAtom.m_actions;
 
     int predCount = 0;
-    for (int i = 0; i < this->getPredictionLength() && i <= config.m_maxLength; i++) {
+    for (int i = 0; i < this->getPredictionLength() && i <= config.m_maxLength;
+         i++) {
         if (Bot::get()->isPlaying()) {
             uint64_t frame = Bot::get()->updater().getFrame() + i;
 
@@ -269,7 +275,8 @@ TrajectoryPlayerData Trajectory::runPrediction(GJBaseGameLayer* pl, PlayerObject
             breakIterationP2 = this->iterate(
                 pl, other, mode | TrajectoryMode::Player2, colors,
                 hasPerformedClickOther,
-                cached[mode | platformerMask | TrajectoryMode::Player2], config);
+                cached[mode | platformerMask | TrajectoryMode::Player2],
+                config);
         }
     }
 
@@ -284,8 +291,9 @@ TrajectoryPlayerData Trajectory::runPrediction(GJBaseGameLayer* pl, PlayerObject
     };
 }
 
-TrajectoryPlayerData Trajectory::simulate(GJBaseGameLayer* pl, bool p1, int mode,
-                          bool clickBothPlayers, PredictionConfig config) {
+TrajectoryPlayerData Trajectory::simulate(GJBaseGameLayer* pl, bool p1,
+                                          int mode, bool clickBothPlayers,
+                                          PredictionConfig config) {
     // VMProtectBeginMutation("TrajectorySimulation");
 
     auto player = p1 ? m_fakePlayer1 : m_fakePlayer2;
@@ -305,20 +313,21 @@ TrajectoryPlayerData Trajectory::simulate(GJBaseGameLayer* pl, bool p1, int mode
     int platformerMask = pl->m_isPlatformer ? TrajectoryMode::Platformer : 0;
 
     if ((!(SLSettings::get()
-              ->trajectory.categories[mode | platformerMask]
-              .enabled ||
-          (SLSettings::get()
-               ->trajectory
-               .categories[(mode & CLICK_MASK) | TrajectoryMode::FollowPlayer |
-                           platformerMask]
-               .enabled &&
-           holdingDirection) ||
-          (SLSettings::get()
-               ->trajectory
-               .categories[(mode & CLICK_MASK) |
-                           TrajectoryMode::FollowOpposite | platformerMask]
-               .enabled &&
-           holdingOpposite))) && !config.m_bypassConfig) {
+               ->trajectory.categories[mode | platformerMask]
+               .enabled ||
+           (SLSettings::get()
+                ->trajectory
+                .categories[(mode & CLICK_MASK) | TrajectoryMode::FollowPlayer |
+                            platformerMask]
+                .enabled &&
+            holdingDirection) ||
+           (SLSettings::get()
+                ->trajectory
+                .categories[(mode & CLICK_MASK) |
+                            TrajectoryMode::FollowOpposite | platformerMask]
+                .enabled &&
+            holdingOpposite))) &&
+        !config.m_bypassConfig) {
         return {};
     }
 
@@ -360,8 +369,8 @@ TrajectoryPlayerData Trajectory::simulate(GJBaseGameLayer* pl, bool p1, int mode
                         ->trajectory.categories[mode | platformerMask]
                         .colors.data();
 
-    auto predicted = this->runPrediction(pl, player, otherPlayer, mode, colors, clickBothPlayers,
-                        m_data, config);
+    auto predicted = this->runPrediction(pl, player, otherPlayer, mode, colors,
+                                         clickBothPlayers, m_data, config);
 
     player->setVisible(false);
     otherPlayer->setVisible(false);
@@ -470,7 +479,8 @@ void Trajectory::update(GJBaseGameLayer* pl) {
     this->m_fakePlayer1->setVisible(false);
     this->m_fakePlayer2->setVisible(false);
 
-    if (auto lel = LevelEditorLayer::get(); lel && lel->m_playbackMode == PlaybackMode::Not) {
+    if (auto lel = LevelEditorLayer::get();
+        lel && lel->m_playbackMode == PlaybackMode::Not) {
         return;
     }
 
@@ -552,7 +562,8 @@ void Trajectory::update(GJBaseGameLayer* pl) {
     if (updater.m_layoutMode->inner() && !LevelEditorLayer::get()) {
         constexpr std::array<int, 5> colors = {1000, 1001, 1009, 1013, 1014};
         for (const int color : colors) {
-            if (ColorAction* action = pl->m_effectManager->getColorAction(color)) {
+            if (ColorAction* action =
+                    pl->m_effectManager->getColorAction(color)) {
                 switch (color) {
                     case 1000: {
                         auto& col = SLSettings::get()->layoutBgColor;
@@ -583,18 +594,22 @@ void Trajectory::update(GJBaseGameLayer* pl) {
 }
 
 void Trajectory::drawHitbox(PlayerObject* player) {
-    #define CC_COLOR(color_type) *reinterpret_cast<cocos2d::ccColor4F*>(settings.categories[color_type].colors.data())
-    float width = m_state->m_width->inner() / GJBaseGameLayer::get()->m_gameState.m_cameraZoom;
+#define CC_COLOR(color_type)                \
+    *reinterpret_cast<cocos2d::ccColor4F*>( \
+        settings.categories[color_type].colors.data())
+    float width = m_state->m_width->inner() /
+                  GJBaseGameLayer::get()->m_gameState.m_cameraZoom;
     CCRect rect = usingWidth(player->getObjectRect(), width);
     CCRect scaled = usingWidth(player->getObjectRect(0.3, 0.3), width);
 
     auto& settings = SLSettings::get()->hitboxes;
     using Type = SLSettings::HitboxSettings::Type;
 
-    drawRotatedRect(m_node, rect, player->getRotation(), CC_COLOR(Type::PlayerRotated), width);
+    drawRotatedRect(m_node, rect, player->getRotation(),
+                    CC_COLOR(Type::PlayerRotated), width);
     drawRect(m_node, rect, CC_COLOR(Type::Player), width);
     drawRect(m_node, scaled, CC_COLOR(Type::PlayerInner), width);
-    #undef CC_COLOR
+#undef CC_COLOR
 }
 
 bool Trajectory::playerHasActivated(PlayerObject* player,
@@ -651,7 +666,8 @@ void RingObject_spawnCircle(RingObject* self) {
 //     RingObject_spawnCircle_orig =
 //         reinterpret_cast<void*>(geode::base::get() + 0x4896d0);
 
-//     (void)Mod::get()->hook(RingObject_spawnCircle_orig, &RingObject_spawnCircle,
+//     (void)Mod::get()->hook(RingObject_spawnCircle_orig,
+//     &RingObject_spawnCircle,
 //                            "RingObject::spawnCircle",
 //                            tulip::hook::TulipConvention::Default);
 // }

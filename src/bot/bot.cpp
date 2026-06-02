@@ -10,11 +10,11 @@
 #include "label/label.hpp"
 #include "render/renderer.hpp"
 #include "replay/system.hpp"
+#include "scheduler.hpp"
 #include "shared/value/value.hpp"
 #include "trajectory/trajectory.hpp"
 #include "ui/manager.hpp"
 #include "updater.hpp"
-#include "scheduler.hpp"
 
 #ifdef SILICATE_PROTECT
 #include "VMProtect/VMProtectSDK.h"
@@ -130,39 +130,34 @@ void Bot::initialize() {
         }
 
         auto patches = Mod::get()->getPatches();
-        std::ranges::for_each(
-            patches, [enabled](Patch* p) {
-                if (enabled) {
-                    geode::log::info("Enabling patch at 0x{:x}", p->getAddress());
-                    (void)p->enable();
-                } else {
-                    geode::log::info("Disabling patch at 0x{:x}", p->getAddress());
-                    (void)p->disable();
-                }
+        std::ranges::for_each(patches, [enabled](Patch* p) {
+            if (enabled) {
+                geode::log::info("Enabling patch at 0x{:x}", p->getAddress());
+                (void)p->enable();
+            } else {
+                geode::log::info("Disabling patch at 0x{:x}", p->getAddress());
+                (void)p->disable();
             }
-        );
+        });
 
         auto hooks = Mod::get()->getHooks();
-        std::ranges::for_each(
-            hooks, [enabled](Hook* h) {
-                if (h->getDisplayName() == "cocos2d::CCEGLView::swapBuffers") {
-                    return;
-                }
-
-                if (enabled) {
-                    (void)h->enable();
-                } else {
-                    (void)h->disable();
-                }
+        std::ranges::for_each(hooks, [enabled](Hook* h) {
+            if (h->getDisplayName() == "cocos2d::CCEGLView::swapBuffers") {
+                return;
             }
-        );
+
+            if (enabled) {
+                (void)h->enable();
+            } else {
+                (void)h->disable();
+            }
+        });
 
         if (enabled) {
             geode::log::info("Successfully enabled Silicate.");
         } else {
             geode::log::info("Successfully disabled Silicate.");
         }
-
     });
 
     this->replaySystem().m_autosaveInterval->notifyChange();

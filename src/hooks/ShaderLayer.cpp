@@ -10,7 +10,9 @@ using namespace geode::prelude;
 
 struct SLShaderLayer : Modify<SLShaderLayer, ShaderLayer> {
     void performCalculations() {
-        if (Bot::get()->isEnabled() && Bot::get()->updater().m_layoutMode->inner() && !LevelEditorLayer::get()) {
+        if (Bot::get()->isEnabled() &&
+            Bot::get()->updater().m_layoutMode->inner() &&
+            !LevelEditorLayer::get()) {
             m_state.m_usesShaders = false;
             return;
         }

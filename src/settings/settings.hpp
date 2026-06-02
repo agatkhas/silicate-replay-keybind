@@ -138,15 +138,15 @@ class SLSettings {
         };
 
         std::unordered_map<int, HBState> categories = {
-            {Type::Player,        {true, 0.0, { 1.0, 0.0, 0.0, 1.0 }}},
-            {Type::PlayerInner,   {true, 0.0, { 0.0, 0.0, 1.0, 1.0 }}},
-            {Type::PlayerRotated, {true, 0.0, { 0.5, 0.0, 0.0, 1.0 }}},
-            {Type::PlayerCircle,  {true, 0.0, { 1.0, 0.0, 0.0, 1.0 }}},
+            {Type::Player, {true, 0.0, {1.0, 0.0, 0.0, 1.0}}},
+            {Type::PlayerInner, {true, 0.0, {0.0, 0.0, 1.0, 1.0}}},
+            {Type::PlayerRotated, {true, 0.0, {0.5, 0.0, 0.0, 1.0}}},
+            {Type::PlayerCircle, {true, 0.0, {1.0, 0.0, 0.0, 1.0}}},
 
-            {Type::Solid,         {true, 0.0, { 0.0, 0.0, 1.0, 1.0 }}},
-            {Type::Hazard,        {true, 0.0, { 1.0, 0.0, 0.0, 1.0 }}},
-            {Type::Passable,      {true, 0.0, { 0.0, 1.0, 1.0, 1.0 }}},
-            {Type::Interactable,  {true, 0.0, { 1.0, 1.0, 0.0, 1.0 }}},
+            {Type::Solid, {true, 0.0, {0.0, 0.0, 1.0, 1.0}}},
+            {Type::Hazard, {true, 0.0, {1.0, 0.0, 0.0, 1.0}}},
+            {Type::Passable, {true, 0.0, {0.0, 1.0, 1.0, 1.0}}},
+            {Type::Interactable, {true, 0.0, {1.0, 1.0, 0.0, 1.0}}},
         };
     } hitboxes;
 

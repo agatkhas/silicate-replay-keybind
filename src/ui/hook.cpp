@@ -1,4 +1,5 @@
 #include "hook.hpp"
+
 #include <winuser.h>
 
 #include <tabby.hpp>
@@ -7,8 +8,8 @@
 #include "Geode/cocos/platform/win32/CCGL.h"
 #include "context/context.hpp"
 #include "render/renderer.hpp"
-#include "ui/manager.hpp"
 #include "replay/system.hpp"
+#include "ui/manager.hpp"
 // this is horrible but it works
 #include "../../lib/tabby/lib/imgui_lib/imgui.h"
 
@@ -118,7 +119,8 @@ LRESULT CALLBACK h_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 break;
             }
 
-            std::filesystem::path dest = Mod::get()->getPersistentDir() / "replays" / path.filename();
+            std::filesystem::path dest =
+                Mod::get()->getPersistentDir() / "replays" / path.filename();
 
             rs.createBackup();
             rs.backupExisting(dest);
@@ -127,7 +129,6 @@ LRESULT CALLBACK h_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
             rs.m_replayName = path.stem().string();
         }
-
 
         DragFinish(drop);
     }
@@ -265,7 +266,6 @@ void ImGuiHookCtx::init(cocos2d::CCEGLView* view) {
     m_oWndProc =
         (WNDPROC)SetWindowLongPtr(m_hWnd, GWLP_WNDPROC, (LONG_PTR)h_WndProc);
     m_ctx.init(tabby::Context::CtxInitParams{.hdc = (void*)hdc});
-
 
     float width = view->getFrameSize().width / BLUR_DOWNSCALING_FACTOR;
     float height = view->getFrameSize().height / BLUR_DOWNSCALING_FACTOR;
@@ -416,7 +416,6 @@ void ImGuiHookCtx::sampleBlurPostprocess() {
     glUniform1f(4, m_time);
 
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
-
 }
 
 void ImGuiHookCtx::postSampleBlur() {

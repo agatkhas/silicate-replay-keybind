@@ -1,15 +1,17 @@
 #pragma once
 
 #include <Geode/Geode.hpp>
-#include "trajectory/trajectory.hpp"
+
 #include "bot/bot.hpp"
 #include "object.hpp"
+#include "trajectory/trajectory.hpp"
 
 namespace phys {
 
 int checkPlayerCollisions(GJBaseGameLayer* gameLayer, PlayerObject* player);
 int collidedWithObjectInternal(PlayerObject* player, float dt,
-                               GameObject* object, cocos2d::CCRect* p4, bool p5);
+                               GameObject* object, cocos2d::CCRect* p4,
+                               bool p5);
 void preSlopeCollision(PlayerObject* player, float dt, GameObject* slope);
 void collidedWithSlopeInternal(PlayerObject* player);
 void activateForTrajectory(EffectGameObject* obj, PlayerObject* player);
@@ -23,46 +25,54 @@ inline bool activatingPortal(GJBaseGameLayer* pl, PlayerObject* player,
 
         pl->playerWillSwitchMode(player, portal);
 
-        bool isTheSame = ((portal->m_objectType == GameObjectType::ShipPortal) && player->m_isShip)
-            || ((portal->m_objectType == GameObjectType::BallPortal) && player->m_isBall)
-            || ((portal->m_objectType == GameObjectType::UfoPortal) && player->m_isBird)
-            || ((portal->m_objectType == GameObjectType::WavePortal) && player->m_isDart)
-            || ((portal->m_objectType == GameObjectType::SpiderPortal) && player->m_isSpider)
-            || ((portal->m_objectType == GameObjectType::SwingPortal) && player->m_isSwing)
-            || ((portal->m_objectType == GameObjectType::RobotPortal) && player->m_isRobot)
-            || ((portal->m_objectType == GameObjectType::CubePortal) && (
-                !(player->m_isShip || player->m_isBall || player->m_isBird || player->m_isDart || player->m_isSpider || player->m_isSwing)
-            ));
+        bool isTheSame =
+            ((portal->m_objectType == GameObjectType::ShipPortal) &&
+             player->m_isShip) ||
+            ((portal->m_objectType == GameObjectType::BallPortal) &&
+             player->m_isBall) ||
+            ((portal->m_objectType == GameObjectType::UfoPortal) &&
+             player->m_isBird) ||
+            ((portal->m_objectType == GameObjectType::WavePortal) &&
+             player->m_isDart) ||
+            ((portal->m_objectType == GameObjectType::SpiderPortal) &&
+             player->m_isSpider) ||
+            ((portal->m_objectType == GameObjectType::SwingPortal) &&
+             player->m_isSwing) ||
+            ((portal->m_objectType == GameObjectType::RobotPortal) &&
+             player->m_isRobot) ||
+            ((portal->m_objectType == GameObjectType::CubePortal) &&
+             (!(player->m_isShip || player->m_isBall || player->m_isBird ||
+                player->m_isDart || player->m_isSpider || player->m_isSwing)));
 
         cocos2d::CCPoint position = player->getPosition();
         // if (portal->m_objectType == GameObjectType::CubePortal) {
-            player->switchedToMode(portal->m_objectType);
+        player->switchedToMode(portal->m_objectType);
         // }
 
         switch (portal->m_objectType) {
-        case GameObjectType::ShipPortal:
-            player->toggleFlyMode(true, true);
-            break;
-        case GameObjectType::BallPortal:
-            player->toggleRollMode(true, true);
-            break;
-        case GameObjectType::UfoPortal:
-            player->toggleBirdMode(true, true);
-            break;
-        case GameObjectType::WavePortal:
-            player->toggleDartMode(true, true);
-            break;
-        case GameObjectType::SpiderPortal:
-            player->toggleSpiderMode(true, true);
-            break;
-        case GameObjectType::SwingPortal:
-            player->toggleSwingMode(true, true);
-            break;
-        case GameObjectType::RobotPortal:
-            player->toggleRobotMode(true, true);
-            break;
-        default:
-            break;
+            case GameObjectType::ShipPortal:
+                player->toggleFlyMode(true, true);
+                break;
+            case GameObjectType::BallPortal:
+                player->toggleRollMode(true, true);
+                break;
+            case GameObjectType::UfoPortal:
+                player->toggleBirdMode(true, true);
+                break;
+            case GameObjectType::WavePortal:
+                player->toggleDartMode(true, true);
+                break;
+            case GameObjectType::SpiderPortal:
+                player->toggleSpiderMode(true, true);
+                break;
+            case GameObjectType::SwingPortal:
+                player->toggleSwingMode(true, true);
+                break;
+            case GameObjectType::RobotPortal:
+                player->toggleRobotMode(true, true);
+                break;
+            default:
+                break;
         }
 
         player->setPosition(position);
@@ -79,7 +89,8 @@ inline bool activatingPortal(GJBaseGameLayer* pl, PlayerObject* player,
     return false;
 }
 
-void bumpPlayerFromGJBGL(GJBaseGameLayer* pl, PlayerObject* player, EffectGameObject* object);
+void bumpPlayerFromGJBGL(GJBaseGameLayer* pl, PlayerObject* player,
+                         EffectGameObject* object);
 
 // int handleRotatedCollisionInternal(
 //     PlayerObject* player,
@@ -120,6 +131,7 @@ void collisionCheckObjects(GJBaseGameLayer* pl, PlayerObject* player,
                            gd::vector<GameObject*>* objects, int objectCount,
                            float dt);
 
-void triggerObject(EffectGameObject* obj, GJBaseGameLayer* pl, PlayerObject* player);
+void triggerObject(EffectGameObject* obj, GJBaseGameLayer* pl,
+                   PlayerObject* player);
 void checkSpawnObjects(GJBaseGameLayer* pl, PlayerObject* player);
 }  // namespace phys

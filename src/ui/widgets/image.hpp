@@ -5,8 +5,8 @@
 
 // bool loadTexFromImageFile(const std::filesystem::path& path, GLuint& texID) {
 //     int width, height, channels;
-//     uint8_t* data = stbi_load(path.string().c_str(), &width, &height, &channels, 0);
-//     if (!data) {
+//     uint8_t* data = stbi_load(path.string().c_str(), &width, &height,
+//     &channels, 0); if (!data) {
 //         return false;
 //     }
 
@@ -19,7 +19,8 @@
 
 //     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 //     if (channels == 4) {
-//         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+//         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA,
+//         GL_UNSIGNED_BYTE, data);
 //     }
 //     stbi_image_free(data);
 
