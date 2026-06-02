@@ -750,7 +750,16 @@ void UIManager::draw() {
                     }
                 });
 
-                tabby::radio(bot->m_mode, Bot::Mode::Recording, "Record##Mode");
+                if (tabby::radio(bot->m_mode, Bot::Mode::Recording, "Record##Mode").changed) {
+                  // prune all inputs after current frame if in a level
+                  if (PlayLayer::get()) {
+                    if (rs.getInputIndex() < rs.m_actionAtom.length()) {
+                      rs.createBackup();
+                      rs.m_actionAtom.clipActions(bot->updater().getFrame());
+                    }
+                  }
+                }
+
                 tabby::spacer(16.0);
                 tabby::radio(bot->m_mode, Bot::Mode::Playing, "Play##Mode");
 
