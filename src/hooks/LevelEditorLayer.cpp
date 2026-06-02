@@ -54,7 +54,14 @@ struct SLLevelEditorLayer : Modify<SLLevelEditorLayer, LevelEditorLayer> {
         if (!LevelEditorLayer::init(level, p1)) return false;
 
         Bot::get()->hitboxes().init(this);
-        Bot::get()->trajectory().init();
+
+        auto& t = Bot::get()->trajectory();
+
+        if (t.exists()) {
+          t.uninit();
+        }
+
+        t.init();
 
         return true;
     }
