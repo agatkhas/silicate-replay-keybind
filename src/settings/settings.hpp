@@ -174,6 +174,8 @@ struct glz::meta<SLSettings> {
         "speed", hide{&T::speed},
         "real_time", &T::realTime,
         "max_upr", &T::maxUpr,
+        "target_fps", &T::fpsTarget,
+        "dynamic_upr", &T::dynamicUpr,
         "trajectory", &T::trajectory,
         "hitboxes", &T::hitboxes,
         "speedhack_audio", &T::speedhackAudio,
