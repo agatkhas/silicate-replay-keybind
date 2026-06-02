@@ -769,7 +769,7 @@ void UIManager::draw() {
                     m_state.m_showExperimentalFeatures) {
                     if (tabby::button("Add TPS Change").pressed) {
                         (void)bot->replaySystem().m_actionAtom.addAction(
-                            bot->updater().getFrame(), bot->updater().getTps());
+                            bot->updater().getFrame() - 1, bot->updater().getTps());
                         bot->updater().estimatedStepCount = 0;
                     }
                 }
