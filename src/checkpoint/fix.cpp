@@ -110,7 +110,12 @@ void PracticeFix::saveState(CheckpointObject* obj, uint64_t attemptStartFrame) {
     m_storedFrames.push_back(checkpoint);
 }
 
-void PracticeFix::clearStoredFrames() { m_storedFrames.clear(); }
+void PracticeFix::clearStoredFrames() {
+    for (auto& frame : m_storedFrames) {
+        frame.m_checkpoint->release();
+    }
+    m_storedFrames.clear();
+}
 
 bool PracticeFix::canRestoreState() {
     if (!PlayLayer::get()) return false;
@@ -230,7 +235,8 @@ $execute {
         }
 
         auto& storedFrames = Bot::get()->practiceFix().m_storedFrames;
-        while (storedFrames.size() >= frames) {
+        while (storedFrames.size() > frames) {
+            storedFrames.front().m_checkpoint->release();
             storedFrames.pop_front();
         }
     });

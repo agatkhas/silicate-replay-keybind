@@ -444,15 +444,20 @@ void Hitboxes::saveToTrail(GJBaseGameLayer* pl) {
         return; // don't
     }
 
+    auto* p1Box = pl->m_player1->getOrientedBox();
+    auto* p2Box = pl->m_player2->getOrientedBox();
+
     m_trailP1.push_back({
         .m_rect = pl->m_player1->getObjectRect(),
         .m_scaled = pl->m_player1->getObjectRect(0.3, 0.3),
-        .m_rotated = pl->m_player1->getOrientedBox()->m_corners,
+        .m_rotated = p1Box ? p1Box->m_corners
+                           : std::array<cocos2d::CCPoint, 4>{},
     });
     m_trailP2.push_back({
         .m_rect = pl->m_player2->getObjectRect(),
         .m_scaled = pl->m_player2->getObjectRect(0.3, 0.3),
-        .m_rotated = pl->m_player2->getOrientedBox()->m_corners,
+        .m_rotated = p2Box ? p2Box->m_corners
+                           : std::array<cocos2d::CCPoint, 4>{},
     });
 
     if (m_trailP1.size() > 69420) {

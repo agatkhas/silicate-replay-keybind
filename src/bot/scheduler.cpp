@@ -42,10 +42,12 @@ void BotScheduler::reschedule(const JobId id, const double interval) {
 }
 
 void BotScheduler::update(const float dt) {
-    for (auto& [id, job] : m_jobs) {
-        job.update(dt);
-        if (job.m_stale) {
-            this->unschedule(id);
+    for (auto it = m_jobs.begin(); it != m_jobs.end();) {
+        it->second.update(dt);
+        if (it->second.m_stale) {
+            it = m_jobs.erase(it);
+        } else {
+            ++it;
         }
     }
 }

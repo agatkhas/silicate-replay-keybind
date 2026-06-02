@@ -252,7 +252,8 @@ void BotUpdater::runUpdates(std::function<void(float)> update, float realDt,
 
     bool calculateSsb = false;
     if (isPlayLayer) {
-        !((PlayLayer*)pl)->m_isPaused &&
+        calculateSsb =
+            !((PlayLayer*)pl)->m_isPaused &&
             !((PlayLayer*)pl)->m_hasCompletedLevel && pl->m_started &&
             !pl->m_isPlatformer && m_ssbFix->inner() &&
             Renderer::get()->isRecording();
@@ -287,11 +288,17 @@ void BotUpdater::runUpdates(std::function<void(float)> update, float realDt,
     bot->labels().update(disableLabels);
     bot->trajectory().update(PlayLayer::get());
 
-    auto endTime = std::chrono::high_resolution_clock::now();
-    double elapsedFrameTime = std::chrono::duration<float, std::milli>(endTime - startTime).count() / this->totalStepCount / 1000.0;
-    double dynamicDt = m_fpsTarget->inner() * elapsedFrameTime;
-    if (m_dynamicUpr->inner()) {
-      m_stepLimit = std::max(1, static_cast<int>(std::floor(1.0 / dynamicDt)));
+    if (m_dynamicUpr->inner() && this->totalStepCount > 0) {
+        auto endTime = std::chrono::high_resolution_clock::now();
+        double secondsPerStep =
+            std::chrono::duration<double>(endTime - startTime).count() /
+            this->totalStepCount;
+        double dynamicDt = m_fpsTarget->inner() * secondsPerStep;
+        // guard against non-finite results before the int cast
+        if (std::isfinite(dynamicDt) && dynamicDt > 0.0) {
+            m_stepLimit =
+                std::max(1, static_cast<int>(std::floor(1.0 / dynamicDt)));
+        }
     }
 }
 
