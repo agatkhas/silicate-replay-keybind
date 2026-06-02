@@ -76,8 +76,11 @@ static std::vector<RenderOpt> parseArgs(std::stringstream& in) {
 
 void Renderer::saveSettings(fs::path& path) const {
     auto& settings = m_settings;
+  
+    std::u8string pathU8 = path.u8string();
+
     (void)glz::write_file_json<glz::opts{.prettify = true}>(
-        settings, path.string(), std::string{});
+        settings, std::string(pathU8.begin(), pathU8.end()), std::string{});
 }
 
 enum class GPUVendor {
@@ -155,7 +158,9 @@ void Renderer::loadSettings(fs::path& path) {
     }
 
     auto& settings = m_settings;
-    auto ec = glz::read_file_json(settings, path.string(), std::string{});
+    std::u8string pathU8 = path.u8string();
+
+    auto ec = glz::read_file_json(settings, std::string(pathU8.begin(), pathU8.end()), std::string{});
     if (ec) {
         geode::log::error("Failed to read renderer settings: {}",
                           ec.custom_error_message);
@@ -237,6 +242,7 @@ geode::Result<> Renderer::start() {
         args = parseArgs(s);
     }
 
+    std::string fileName;
     if (m_autoVideoName->inner()) {
         auto pl = PlayLayer::get();
 
@@ -250,17 +256,21 @@ geode::Result<> Renderer::start() {
         replaceString(formatted, "%creator%", pl->m_level->m_creatorName);
         replaceString(formatted, "%rand%", std::to_string(randomNumber));
 
-        out = Mod::get()->getPersistentDir() / "videos" /
-              std::string(formatted + "." + m_settings.m_extension);
+        fileName = formatted + "." + m_settings.m_extension;
     } else {
-        out =
-            Mod::get()->getPersistentDir() / "videos" /
-            std::string(m_settings.m_outputPath + "." + m_settings.m_extension);
+        fileName = m_settings.m_outputPath + "." + m_settings.m_extension;
     }
+
+    // .string() is ansi but we want utf8 for them russians
+    out = Mod::get()->getPersistentDir() / "videos" /
+          std::filesystem::path(std::u8string(fileName.begin(), fileName.end()));
+
+    auto outU8 = out.u8string();
+    std::string outPath(outU8.begin(), outU8.end());
 
     {
         ff->avformat_alloc_output_context2(&m_formatCtx, nullptr, nullptr,
-                                           out.string().c_str());
+                                           outPath.c_str());
     }
     if (!m_formatCtx) {
         return geode::Err("Failed to allocate output context");
@@ -431,8 +441,7 @@ geode::Result<> Renderer::start() {
 
     m_audioStream->time_base = m_audioCodecCtx->time_base;
 
-    if (ff->avio_open(&m_formatCtx->pb, out.string().c_str(), AVIO_FLAG_WRITE) <
-        0) {
+    if (ff->avio_open(&m_formatCtx->pb, outPath.c_str(), AVIO_FLAG_WRITE) < 0) {
         return geode::Err("Failed to open output file");
     }
 
