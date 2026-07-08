@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
       - name: Checkout
@@ -28,6 +28,9 @@ jobs:
         with:
           target: Win64
           build-config: Release
+          configure-args: >
+            -DCMAKE_C_COMPILER=clang-cl
+            -DCMAKE_CXX_COMPILER=clang-cl
 
       - name: Upload built geode
         uses: actions/upload-artifact@v4
