@@ -118,7 +118,20 @@ void Bot::initialize() {
         Renderer::get()->initializeDefaults();
     }
 
-    m_enabled->handle([&](bool& enabled) {
+    	m_modeKeybind->handle([](int& mode) {
+		auto* bot = Bot::get();
+
+		// 0 = Record, 1 = Play.
+		if (mode <= 0) {
+			mode = 0;
+			bot->setMode(Bot::Mode::Recording);
+		} else {
+			mode = 1;
+			bot->setMode(Bot::Mode::Playing);
+		}
+	});
+
+	m_enabled->handle([&](bool& enabled) {
         if (PlayLayer::get()) {
             enabled = true;
             return;

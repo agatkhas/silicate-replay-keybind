@@ -54,7 +54,10 @@ class Bot {
 
     bool isRecording() { return m_mode == Recording; }
     bool isPlaying() { return m_mode == Playing; }
-    void setMode(Mode mode) { m_mode = mode; }
+    void setMode(Mode mode) {
+		 m_mode = mode;
+		 m_modeKeybindValue = static_cast<int>(mode);
+	}
 
     BotUpdater& updater();
     BotScheduler& scheduler();
@@ -67,6 +70,9 @@ class Bot {
     LabelManager& labels();
 
     Mode m_mode = Recording;
+	int m_modeKeybindValue = static_cast<int>(Recording);
+	SLValuePtr<int> m_modeKeybind =
+		SLValue<int>::create("replay.mode", &m_modeKeybindValue);
     SLValuePtr<bool> m_enabled = SLValue<bool>::create(
         "_________________bot.enabled", &SLSettings::get()->botEnabled);
 
