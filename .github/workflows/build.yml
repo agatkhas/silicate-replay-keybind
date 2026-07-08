@@ -1,0 +1,36 @@
+name: Build Silicate
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Clone tabby dependency
+        shell: pwsh
+        run: |
+          if (!(Test-Path "lib/tabby")) {
+            git clone -b legacy-v1 https://git.puppy.lgbt/silicate/tabby.git lib/tabby
+          }
+
+      - name: Build Geode mod
+        id: build
+        uses: geode-sdk/build-geode-mod@main
+        with:
+          target: Win64
+          build-config: Release
+
+      - name: Upload built geode
+        uses: actions/upload-artifact@v4
+        with:
+          name: silicate-replay-keybind
+          path: ${{ steps.build.outputs.build-output }}
