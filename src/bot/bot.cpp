@@ -130,6 +130,26 @@ void Bot::initialize() {
 			bot->setMode(Bot::Mode::Playing);
 		}
 	});
+    m_playToggleKeybind->handle([](bool& playing) {
+    auto* bot = Bot::get();
+    auto& rs = bot->replaySystem();
+
+    if (playing) {
+        auto path = rs.getCurrentPath();
+
+        if (std::filesystem::exists(path)) {
+            rs.load(path);
+        } else {
+            bot->setMode(Bot::Mode::Playing);
+        }
+
+        rs.onReset(bot->updater().getFrame());
+    } else {
+        bot->setMode(Bot::Mode::Recording);
+        rs.onReset(bot->updater().getFrame());
+    }
+});
+    
 
 	m_enabled->handle([&](bool& enabled) {
         if (PlayLayer::get()) {
